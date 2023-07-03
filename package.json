@@ -4,19 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check build-only",
-    "build:component": "vue-cli-service build --target lib --name hello-world ./src/components/HelloWorld.vue",
+    "build": "vue-cli-service build --target lib --name vue-stappen ./src/components/Stepper.vue",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "vue": "^3.2.45",
-    "vue-router": "^4.1.6"
+    "lodash.startcase": "^4.4.0",
+    "vue": "^3.2.45"
   },
   "devDependencies": {
+    "vue-router": "^4.1.6",
     "@rushstack/eslint-patch": "^1.1.4",
+    "@types/lodash.startcase": "^4.4.7",
     "@types/node": "^18.11.12",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/cli-plugin-typescript": "^5.0.8",
