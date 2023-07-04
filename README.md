@@ -6,7 +6,7 @@ Vue Stappen (Vue Steps) is a pre-built component that serves as a foundation for
 - [x] Publish to npm
 - [x] Test in project
 - [x] Go public 
-- [ ] Document callbacks
+- [ ] Document events
 - [ ] Add typescript support
 
 ## Installation 🛠️

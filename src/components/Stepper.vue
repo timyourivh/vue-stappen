@@ -128,15 +128,16 @@ const previousStep = computed<Step | null>(() => {
  * @param index Index of the step you want to navigate to.
  * @param force Override to force navigation if navigable is false.
  */
-const navigateToIndex = (index: number, force = false) => {
+const navigateToIndex = async (index: number, force = false) => {
   let continues = true;
 
   if (continues && steps.value[stepIndex.value]?.onLeave)
     // Check if onLeave callback exists and execute it.
     // The result of the method determines if allowed to continue.
     continues =
-      steps.value[stepIndex.value]?.onLeave?.(steps.value[stepIndex.value]) !==
-      false;
+      (await steps.value[stepIndex.value]?.onLeave?.(
+        steps.value[stepIndex.value]
+      )) !== false;
 
   if (
     continues &&
@@ -149,7 +150,8 @@ const navigateToIndex = (index: number, force = false) => {
   if (continues && steps.value[index] && steps.value[index]?.onEnter)
     // Check if onEnter callback exists on the requested index and execute it.
     // The result of the method determines if allowed to continue.
-    continues = steps.value[index]?.onEnter?.(steps.value[index]) !== false;
+    continues =
+      (await steps.value[index]?.onEnter?.(steps.value[index])) !== false;
 
   steps.value[stepIndex.value].visited = true;
 

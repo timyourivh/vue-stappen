@@ -4,7 +4,16 @@ import Stepper from '../components/Stepper.vue';
 
 const steps = reactive({
   step1: {},
-  step2: {},
+  step2: {
+    title: 'Async example',
+    onLeave: async () => {
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1000);
+      });
+    },
+  },
   step3: {
     navigable: true,
   },
