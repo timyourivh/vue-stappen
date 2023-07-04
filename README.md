@@ -214,4 +214,4 @@ const example3 = () => {
 |-|-|-|-|
 |Steps|steps|object|A defentition for the steps that exist in the stepper. Each key represents a step and it's value the options/configuration for the step.|
 |Header Class|header-class|string|Overwrite the parent of the header class to style the header to your needs.|
-|Not navigable|restricted|boolean|Disable navigation to all steps from header (can still be overwritten by step itself by setting naviageble explicitly true).|
+|Not navigable|restricted|boolean\|string|Disable navigation to all steps from header (can still be overwritten by step itself by setting naviageble explicitly true). Set to "allow-visited" to allow only visited steps to be navigable.|

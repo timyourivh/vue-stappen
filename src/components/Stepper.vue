@@ -74,7 +74,7 @@ const props = withDefaults(
   defineProps<{
     steps: { [stepName: string]: Step };
     headerClass?: string;
-    restricted?: boolean;
+    restricted?: string | boolean;
   }>(),
   {
     restricted: false,
@@ -195,7 +195,14 @@ defineExpose({
     <div v-if="$slots['header-item']" :class="headerClass">
       <transition-group name="step-header">
         <div v-for="step in steps" :key="step.id">
-          <div @click="navigateToId(step.id)">
+          <div
+            @click="
+              navigateToId(
+                step.id,
+                restricted === 'allow-visited' && step.visited
+              )
+            "
+          >
             <slot
               name="header-item"
               :step="step"
@@ -208,7 +215,15 @@ defineExpose({
     <div v-else :class="headerClass">
       <transition-group name="step-header">
         <div v-for="step in steps" :key="step.id">
-          <div class="cursor-pointer" @click="navigateToId(step.id)">
+          <div
+            class="cursor-pointer"
+            @click="
+              navigateToId(
+                step.id,
+                restricted === 'allow-visited' && step.visited
+              )
+            "
+          >
             <div>Step {{ step.number }}</div>
             <div v-text="step.title" />
           </div>

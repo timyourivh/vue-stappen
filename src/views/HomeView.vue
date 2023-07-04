@@ -16,7 +16,7 @@ const steps = reactive({
 
 <template>
   <main>
-    <Stepper :steps="steps" restricted>
+    <Stepper :steps="steps" restricted="allow-visited">
       <template #header-item="{ step, active }">
         <h3>
           {{ `${active ? '>' : ''}${step.title}` }}
