@@ -62,8 +62,13 @@ type InternalStep = Step & {
 
 const props = defineProps<{
   steps: { [stepName: string]: Step };
+  headerClass?: string;
 }>();
 
+// Configure prop defaults
+const headerClass = props.headerClass || 'vue-stappen-header';
+
+// Construct internal steps array.
 const steps = computed<Array<InternalStep>>(() => {
   return Object.entries(props.steps)
     .map(([key, step]) => {
@@ -84,7 +89,10 @@ const steps = computed<Array<InternalStep>>(() => {
     }) as InternalStep[];
 });
 
+// Define a current index which will be the one truth on what step we are.
 const stepIndex = ref<number>(0);
+
+// Computed values.
 const currentStepNumber = computed<number>(() => {
   return stepIndex.value + 1;
 });
@@ -155,6 +163,7 @@ const previous = () => {
   navigateToIndex(stepIndex.value - 1, true);
 };
 
+// Expose useful methods.
 defineExpose({
   next,
   previous,
@@ -164,7 +173,7 @@ defineExpose({
 
 <template>
   <div>
-    <div v-if="$slots['header-item']" style="display: flex">
+    <div v-if="$slots['header-item']" :class="headerClass">
       <transition-group name="step-header">
         <div v-for="step in steps" :key="step.id">
           <div @click="navigateToId(step.id)">
@@ -177,7 +186,7 @@ defineExpose({
         </div>
       </transition-group>
     </div>
-    <div v-else style="display: flex">
+    <div v-else :class="headerClass">
       <transition-group name="step-header">
         <div v-for="step in steps" :key="step.id">
           <div class="cursor-pointer" @click="navigateToId(step.id)">
@@ -219,7 +228,7 @@ defineExpose({
   </div>
 </template>
 
-<style>
+<style scoped>
 .step-content-enter-active,
 .step-content-leave-active {
   transition: opacity 0.2s ease;
@@ -239,5 +248,9 @@ defineExpose({
 .step-header-leave-to {
   transform: translateY(-30px);
   opacity: 0;
+}
+
+.vue-stappen-header {
+  display: flex;
 }
 </style>

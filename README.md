@@ -206,3 +206,4 @@ Additional options will be added in future updates.
 |Name|Key|Description|
 |-|-|-|
 |Steps|steps|A defentition for the steps that exist in the stepper. Each key represents a step and it's value the options/configuration for the step.|
+|Header Class|header-class|Overwrite the parent header class to style the header to your needs.|
