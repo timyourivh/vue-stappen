@@ -60,11 +60,16 @@ type InternalStep = Step & {
   id: NonNullable<Step['id']>;
 }
 
-const props = defineProps<{
-  steps: { [stepName: string]: Step };
-  headerClass?: string;
-  navigable?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    steps: { [stepName: string]: Step };
+    headerClass?: string;
+    restricted?: boolean;
+  }>(),
+  {
+    restricted: false,
+  }
+);
 
 // Configure prop defaults
 const headerClass = props.headerClass || 'vue-stappen-header';
@@ -77,7 +82,7 @@ const steps = computed<Array<InternalStep>>(() => {
 
       step.show = step.show ?? true;
       step.disabled = step.disabled ?? false;
-      step.navigable = step.navigable ?? props.navigable ?? true;
+      step.navigable = step.navigable ?? !props.restricted;
 
       if (!step.title) step.title = startCase(step.id);
 
