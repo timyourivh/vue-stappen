@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { reactive } from "vue";
-import Stepper from "../components/Stepper.vue";
+import { reactive } from 'vue';
+import Stepper from '../components/Stepper.vue';
 
 const steps = reactive({
-  step1: { },
-  step2: { },
-  step3: { 
-    navigable: true
+  step1: {},
+  step2: {},
+  step3: {
+    navigable: true,
   },
   final: {
     id: 'final-step',
@@ -19,7 +19,7 @@ const steps = reactive({
     <Stepper :steps="steps" restricted>
       <template #header-item="{ step, active }">
         <h3>
-          {{ `${ active ? '>' : ''}${step.title}` }}
+          {{ `${active ? '>' : ''}${step.title}` }}
         </h3>
       </template>
 

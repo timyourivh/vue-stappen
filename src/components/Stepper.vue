@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import startCase from "lodash.startcase";
+import { computed, ref } from 'vue';
+import startCase from 'lodash.startcase';
 
 interface Step {
   /**
@@ -33,9 +33,9 @@ interface Step {
    * to start case.
    */
   title?: string;
-  
+
   /**
-   * A boolean that defaults for false but will become true once the 
+   * A boolean that defaults for false but will become true once the
    * stepper has been on the step.
    */
   visited?: boolean;
@@ -67,8 +67,8 @@ type InternalStep = Step & {
    * navigational purposes. It will change depending on where the
    * step is located.
    */
-   number: number;
-}
+  number: number;
+};
 
 const props = withDefaults(
   defineProps<{
@@ -84,7 +84,6 @@ const props = withDefaults(
 // Configure prop defaults
 const headerClass = props.headerClass || 'vue-stappen-header';
 
-
 // Construct internal steps array.
 const steps = computed<Array<InternalStep>>(() => {
   return Object.entries(props.steps)
@@ -94,7 +93,7 @@ const steps = computed<Array<InternalStep>>(() => {
       step.show = step.show ?? true;
       step.disabled = step.disabled ?? false;
       step.navigable = step.navigable ?? !props.restricted;
-      step.visited = step.visited ?? false;      
+      step.visited = step.visited ?? false;
 
       if (!step.title) step.title = startCase(step.id);
 
@@ -152,7 +151,7 @@ const navigateToIndex = (index: number, force = false) => {
     // The result of the method determines if allowed to continue.
     continues = steps.value[index]?.onEnter?.(steps.value[index]) !== false;
 
-  steps.value[stepIndex.value].visited = true
+  steps.value[stepIndex.value].visited = true;
 
   if (steps.value[index] && continues === true) stepIndex.value = index;
 };
