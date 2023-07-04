@@ -63,6 +63,7 @@ type InternalStep = Step & {
 const props = defineProps<{
   steps: { [stepName: string]: Step };
   headerClass?: string;
+  navigable?: boolean;
 }>();
 
 // Configure prop defaults
@@ -76,7 +77,7 @@ const steps = computed<Array<InternalStep>>(() => {
 
       step.show = step.show ?? true;
       step.disabled = step.disabled ?? false;
-      step.navigable = step.navigable ?? true;
+      step.navigable = step.navigable ?? props.navigable ?? true;
 
       if (!step.title) step.title = startCase(step.id);
 
@@ -228,7 +229,7 @@ defineExpose({
   </div>
 </template>
 
-<style scoped>
+<style>
 .step-content-enter-active,
 .step-content-leave-active {
   transition: opacity 0.2s ease;
@@ -252,5 +253,10 @@ defineExpose({
 
 .vue-stappen-header {
   display: flex;
+}
+
+.vue-stappen-header > div,
+.vue-stappen-header > div > div {
+  width: 100%;
 }
 </style>
