@@ -142,7 +142,15 @@ Once the script is set up, you can create templates in the stepper with names ma
 |Disabled|disabled|boolean|`false`|This option serves as a toggle for disabling/enabling the step. If true the step is still visible but inaccessible.|
 |Navigable|navigable|boolean|`true`|This option serves as a toggle for allowing navigation to the step from the top navigation. If false the step can't be accesssed by clicking it's top navigation entry.|
 |Title|title|string|The ID converted to start case|This option will use a start case version of the ID by default, which can be useful to get 2 birds with 1 stone. If set it will be overwritten of course.|
+|Visited|visited|boolean|false|A flag that can be useful to toggle steps as "vsisted", will automatically be set to `true` when successfully leaving a step.|
 |-|-|-|-|You are not limited to these options and are free to add any custom props that you could use in the template, header-items or footer as these will be presen on the `currentStep`, `previousStep`* and `nextStep`*. <hr /> * = if present|
+
+#### These are properties that can't be set but are accessible on the step:
+
+|Name|key|type|description|
+|-|-|-|-|
+|Number|number|number|This is the number of the step and will laways be + 1 of the previous step even if there are hidden steps.|
+
 
 ## API reference 📖
 ### Templates

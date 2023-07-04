@@ -33,13 +33,12 @@ interface Step {
    * to start case.
    */
   title?: string;
-
+  
   /**
-   * The step number, can't be overwritten this is for display and
-   * navigational purposes. It will change depending on where the
-   * step is located.
+   * A boolean that defaults for false but will become true once the 
+   * stepper has been on the step.
    */
-  number?: number;
+  visited?: boolean;
 
   /**
    * Callback when entering a step.
@@ -57,7 +56,18 @@ interface Step {
 }
 
 type InternalStep = Step & {
+  /**
+   * Inherit these props but require ID for internal use.
+   */
   id: NonNullable<Step['id']>;
+  visited: NonNullable<Step['visited']>;
+
+  /**
+   * The step number, can't be overwritten this is for display and
+   * navigational purposes. It will change depending on where the
+   * step is located.
+   */
+   number: number;
 }
 
 const props = withDefaults(
@@ -74,6 +84,7 @@ const props = withDefaults(
 // Configure prop defaults
 const headerClass = props.headerClass || 'vue-stappen-header';
 
+
 // Construct internal steps array.
 const steps = computed<Array<InternalStep>>(() => {
   return Object.entries(props.steps)
@@ -83,10 +94,11 @@ const steps = computed<Array<InternalStep>>(() => {
       step.show = step.show ?? true;
       step.disabled = step.disabled ?? false;
       step.navigable = step.navigable ?? !props.restricted;
+      step.visited = step.visited ?? false;      
 
       if (!step.title) step.title = startCase(step.id);
 
-      return step;
+      return step as InternalStep;
     })
     .filter((step) => step.show) // Filter out hidden steps.
     .map((step, index) => {
@@ -139,6 +151,8 @@ const navigateToIndex = (index: number, force = false) => {
     // Check if onEnter callback exists on the requested index and execute it.
     // The result of the method determines if allowed to continue.
     continues = steps.value[index]?.onEnter?.(steps.value[index]) !== false;
+
+  steps.value[stepIndex.value].visited = true
 
   if (steps.value[index] && continues === true) stepIndex.value = index;
 };
