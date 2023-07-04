@@ -19,6 +19,13 @@ const steps = reactive({
   },
   final: {
     id: 'final-step',
+    onEnter: async () => {
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1000);
+      });
+    },
   },
 });
 </script>
@@ -30,6 +37,7 @@ const steps = reactive({
         <h3>
           {{ `${active ? '>' : ''}${step.title}` }}
         </h3>
+        <div>Processing: {{ step.processing }}</div>
       </template>
 
       <template #step1>

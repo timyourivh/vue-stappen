@@ -150,6 +150,7 @@ Once the script is set up, you can create templates in the stepper with names ma
 |Name|key|type|description|
 |-|-|-|-|
 |Number|number|number|This is the number of the step and will laways be + 1 of the previous step even if there are hidden steps.|
+|Processing|processing|boolean|This is a flag that will be true during an event to indicate it's busy. Useful for disabling buttons or navigation and such.|
 
 
 ## API reference 📖

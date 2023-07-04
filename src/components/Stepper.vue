@@ -68,6 +68,11 @@ type InternalStep = Step & {
    * step is located.
    */
   number: number;
+
+  /**
+   * A flag that indicates when busy during a callback.
+   */
+  processing: boolean;
 };
 
 const props = withDefaults(
@@ -102,6 +107,7 @@ const steps = computed<Array<InternalStep>>(() => {
     .filter((step) => step.show) // Filter out hidden steps.
     .map((step, index) => {
       step.number = index + 1;
+      step.processing = false;
       return step;
     }) as InternalStep[];
 });
@@ -131,13 +137,18 @@ const previousStep = computed<Step | null>(() => {
 const navigateToIndex = async (index: number, force = false) => {
   let continues = true;
 
-  if (continues && steps.value[stepIndex.value]?.onLeave)
+  if (continues && steps.value[stepIndex.value]?.onLeave) {
+    steps.value[stepIndex.value].processing = true;
+
     // Check if onLeave callback exists and execute it.
     // The result of the method determines if allowed to continue.
     continues =
       (await steps.value[stepIndex.value]?.onLeave?.(
         steps.value[stepIndex.value]
       )) !== false;
+
+    steps.value[stepIndex.value].processing = false;
+  }
 
   if (
     continues &&
@@ -147,11 +158,16 @@ const navigateToIndex = async (index: number, force = false) => {
   )
     continues = false;
 
-  if (continues && steps.value[index] && steps.value[index]?.onEnter)
+  if (continues && steps.value[index] && steps.value[index]?.onEnter) {
+    steps.value[index].processing = true;
+
     // Check if onEnter callback exists on the requested index and execute it.
     // The result of the method determines if allowed to continue.
     continues =
       (await steps.value[index]?.onEnter?.(steps.value[index])) !== false;
+
+    steps.value[index].processing = false;
+  }
 
   steps.value[stepIndex.value].visited = true;
 
