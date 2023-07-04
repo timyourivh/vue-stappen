@@ -6,7 +6,7 @@ interface Step {
   /**
    * Step ID, if set it overwrites the id inherited form the step key.
    */
-  id: string;
+  id?: string;
 
   /**
    * Option to determine if the step should be shown/hidden altogether.
@@ -56,11 +56,15 @@ interface Step {
   onLeave?: (step: Step) => boolean;
 }
 
+type InternalStep = Step & {
+  id: NonNullable<Step['id']>;
+}
+
 const props = defineProps<{
   steps: { [stepName: string]: Step };
 }>();
 
-const steps = computed<Array<Step>>(() => {
+const steps = computed<Array<InternalStep>>(() => {
   return Object.entries(props.steps)
     .map(([key, step]) => {
       if (!step.id) step.id = key;
@@ -77,7 +81,7 @@ const steps = computed<Array<Step>>(() => {
     .map((step, index) => {
       step.number = index + 1;
       return step;
-    });
+    }) as InternalStep[];
 });
 
 const stepIndex = ref<number>(0);
@@ -160,12 +164,12 @@ defineExpose({
 
 <template>
   <div>
-    <div v-if="$slots.header" style="display: flex">
+    <div v-if="$slots['header-item']" style="display: flex">
       <transition-group name="step-header">
         <div v-for="step in steps" :key="step.id">
           <div @click="navigateToId(step.id)">
             <slot
-              name="header"
+              name="header-item"
               :step="step"
               :active="step.number === currentStepNumber"
             />
@@ -174,17 +178,19 @@ defineExpose({
       </transition-group>
     </div>
     <div v-else style="display: flex">
-      <div v-for="step in steps" :key="step.id">
-        <div class="cursor-pointer" @click="navigateToId(step.id)">
-          <div>Step {{ step.number }}</div>
-          <div v-text="step.title" />
+      <transition-group name="step-header">
+        <div v-for="step in steps" :key="step.id">
+          <div class="cursor-pointer" @click="navigateToId(step.id)">
+            <div>Step {{ step.number }}</div>
+            <div v-text="step.title" />
+          </div>
         </div>
-      </div>
+      </transition-group>
     </div>
 
     <transition name="step-content" mode="out-in">
       <slot
-        :name="currentStep?.id ?? 'fallback'"
+        :name="currentStep?.id ?? 'undefined'"
         :current-step="currentStep"
         :next="next"
         :previous="previous"
