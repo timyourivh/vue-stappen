@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { reactive } from "vue";
 import Stepper from "../components/Stepper.vue";
 
-const steps = {
+const steps = reactive({
   step1: {},
   step2: {},
-};
+});
 </script>
 
 <template>

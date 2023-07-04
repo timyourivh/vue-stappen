@@ -2,9 +2,14 @@
   "name": "vue-stappen",
   "version": "1.0.0-alpha.0",
   "private": true,
+  "main": "dist/vue-stappen.common.js",
+  "module": "dist/vue-stappen.common.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "vue-cli-service build --target lib --name vue-stappen ./src/components/Stepper.vue",
+    "build": "vue-cli-service build --target lib ./src/components/Stepper.vue",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",

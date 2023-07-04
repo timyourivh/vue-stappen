@@ -1,0 +1,15 @@
+node_modules
+.vscode
+public
+src
+.eslintrc.cjs
+.gitignore
+.prettierrc.json
+env.d.ts
+index.html
+pnpm-lock.json
+tsconfig.config.json
+tsconfig.dev.json
+tsconfig.json
+vite.config.ts
+*.tgz
