@@ -43,17 +43,19 @@ interface Step {
   /**
    * Callback when entering a step.
    * @param step The current step.
-   * @returns {boolean|null} (expected) Boolean which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
+   * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onEnter?: (step: Step) => boolean
+  onEnter?: (step: Step) => EventReturnValue
 
   /**
    * Callback when leaving a step.
    * @param step The current step.
-   * @returns {boolean|null} (expected) Boolean which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
+   * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onLeave?: (step: Step) => boolean
+  onLeave?: (step: Step) => EventReturnValue
 }
+
+type EventReturnValue = boolean | void | Promise<boolean> | Promise<void>
 
 type InternalStep = Step & {
   /**
