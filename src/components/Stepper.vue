@@ -62,6 +62,9 @@ type InternalStep = Step & {
    * Inherit these props but require ID for internal use.
    */
   id: NonNullable<Step['id']>
+  show: NonNullable<Step['show']>
+  disabled: NonNullable<Step['disabled']>
+  navigable: NonNullable<Step['navigable']>
   visited: NonNullable<Step['visited']>
 
   /**
@@ -144,10 +147,20 @@ const navigateToIndex = async (index: number, force = false) => {
 
     // Check if onLeave callback exists and execute it.
     // The result of the method determines if allowed to continue.
-    continues =
-      (await steps.value[stepIndex.value]?.onLeave?.(
-        steps.value[stepIndex.value]
-      )) !== false
+    try {
+      continues =
+        (await steps.value[stepIndex.value]?.onLeave?.(
+          steps.value[stepIndex.value]
+        )) !== false
+    } catch (error) {
+      console.error(
+        `Uncaught error in onLeave event on step ${
+          steps.value[stepIndex.value].id
+        } -`,
+        error
+      )
+      continues = false
+    }
 
     steps.value[stepIndex.value].processing = false
   }
@@ -165,8 +178,18 @@ const navigateToIndex = async (index: number, force = false) => {
 
     // Check if onEnter callback exists on the requested index and execute it.
     // The result of the method determines if allowed to continue.
-    continues =
-      (await steps.value[index]?.onEnter?.(steps.value[index])) !== false
+    try {
+      continues =
+        (await steps.value[index]?.onEnter?.(steps.value[index])) !== false
+    } catch (error) {
+      console.error(
+        `Uncaught error in onEnter event on step ${
+          steps.value[stepIndex.value].id
+        } -`,
+        error
+      )
+      continues = false
+    }
 
     steps.value[index].processing = false
   }
