@@ -142,6 +142,14 @@ const previousStep = computed<Step | null>(() => {
 const navigateToIndex = async (index: number, force = false) => {
   let continues = true
 
+  if (
+    continues &&
+    (!steps.value[index] || // Checks if the step even exists.
+      steps.value[index].disabled || // Checks if the step is diabled
+      (!steps.value[index].navigable && !force)) // Check if you can navigate to step from header and without override.
+  )
+    continues = false
+
   if (continues && steps.value[stepIndex.value]?.onLeave) {
     steps.value[stepIndex.value].processing = true
 
@@ -164,14 +172,6 @@ const navigateToIndex = async (index: number, force = false) => {
 
     steps.value[stepIndex.value].processing = false
   }
-
-  if (
-    continues &&
-    (!steps.value[index] || // Checks if the step even exists.
-      steps.value[index].disabled || // Checks if the step is diabled
-      (!steps.value[index].navigable && !force)) // Check if you can navigate to step from header and without override.
-  )
-    continues = false
 
   if (continues && steps.value[index] && steps.value[index]?.onEnter) {
     steps.value[index].processing = true
