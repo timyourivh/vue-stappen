@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
-import Stepper from '../components/Stepper.vue';
+import { reactive } from 'vue'
+import Stepper from '../components/Stepper.vue'
 
 const steps = reactive({
   step1: {},
@@ -9,9 +9,9 @@ const steps = reactive({
     onLeave: async () => {
       await new Promise<void>((resolve) => {
         setTimeout(() => {
-          resolve();
-        }, 1000);
-      });
+          resolve()
+        }, 1000)
+      })
     },
   },
   step3: {
@@ -22,12 +22,12 @@ const steps = reactive({
     onEnter: async () => {
       await new Promise<void>((resolve) => {
         setTimeout(() => {
-          resolve();
-        }, 1000);
-      });
+          resolve()
+        }, 1000)
+      })
     },
   },
-});
+})
 </script>
 
 <template>
