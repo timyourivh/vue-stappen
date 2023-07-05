@@ -2,19 +2,39 @@
   "name": "vue-stappen",
   "version": "1.0.0-beta.8",
   "private": false,
+  "description": "Vue 3 stepper skeleton.",
+  "author": {
+    "name": "Tim van Herwijnen",
+    "url": "https://github.com/timyourivh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timyourivh/vue-stappen"
+  },
   "main": "dist/vue-stappen.common.js",
   "module": "dist/vue-stappen.common.js",
   "files": [
     "dist"
   ],
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vue-cli-service build --target lib ./src/components/Stepper.vue",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "version:dev": "pnpm version --tag dev"
   },
+  "keywords": [
+    "vue",
+    "vue3",
+    "vue 3",
+    "stepper",
+    "component",
+    "skeleton",
+    "wizzard"
+  ],
   "dependencies": {
     "lodash.startcase": "^4.4.0",
     "vue": "^3.2.45"
