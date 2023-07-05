@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import startCase from 'lodash.startcase'
 
 interface Step {
@@ -85,6 +85,7 @@ const props = withDefaults(
     steps: { [stepName: string]: Step }
     headerClass?: string
     restricted?: string | boolean
+    modelValue?: null | string
   }>(),
   {
     restricted: false,
@@ -117,15 +118,33 @@ const steps = computed<Array<InternalStep>>(() => {
     }) as InternalStep[]
 })
 
-// Define a current index which will be the one truth on what step we are.
-const stepIndex = ref<number>(0)
+/**
+ * Define a current index which will be the one truth on what step we are.
+ * Default will be modelValue step found by Id or zero.
+ */
+const stepIndex = ref<number>(
+  props.modelValue
+    ? steps.value.findIndex((step: Step) => step.id === props.modelValue)
+    : 0
+)
 
-// Computed values.
+/**
+ * Computed values.
+ * These are pretty self explanatory.
+ */
 const currentStepNumber = computed<number>(() => {
   return stepIndex.value + 1
 })
 const currentStep = computed<Step>(() => {
-  return steps.value[stepIndex.value] ?? null
+  return steps.value[stepIndex.value]
+})
+const currentStepId = computed({
+  get() {
+    return props.modelValue
+  },
+  set(value) {
+    emit('update:modelValue', value)
+  },
 })
 const nextStep = computed<Step | null>(() => {
   return steps.value[stepIndex.value + 1] ?? null
@@ -194,9 +213,15 @@ const navigateToIndex = async (index: number, force = false) => {
     steps.value[index].processing = false
   }
 
-  steps.value[stepIndex.value].visited = true
+  if (steps.value[stepIndex.value]) {
+    steps.value[stepIndex.value].visited = true
+  }
 
-  if (steps.value[index] && continues === true) stepIndex.value = index
+  if (steps.value[index] && continues === true) {
+    stepIndex.value = index
+    emit('change', currentStep.value)
+    currentStepId.value = currentStep.value.id // Emits update model value
+  }
 }
 
 /**
@@ -215,6 +240,7 @@ const navigateToId = (stepId: string, force = false) => {
  * Method to naviagate to the next step.
  */
 const next = () => {
+  emit('next', currentStep.value)
   navigateToIndex(stepIndex.value + 1, true)
 }
 
@@ -222,15 +248,35 @@ const next = () => {
  * Method to naviagate to the next previous step.
  */
 const previous = () => {
+  emit('previous', currentStep.value)
   navigateToIndex(stepIndex.value - 1, true)
 }
 
-// Expose useful methods.
+/**
+ * Watch the current step id, it is directly linked to the modelvalue.
+ * Navigate when this value changes.
+ */
+watch(currentStepId, (value) => {
+  if (value) {
+    navigateToId(value)
+  }
+})
+
+onMounted(() => {
+  if (!props.modelValue) {
+    emit('update:modelValue', currentStep.value.id)
+  }
+})
+
+/**
+ * Vue defines.
+ */
 defineExpose({
   next,
   previous,
   navigateToId,
 })
+const emit = defineEmits(['next', 'previous', 'change', 'update:modelValue'])
 </script>
 
 <template>
@@ -276,7 +322,7 @@ defineExpose({
 
     <transition name="step-content" mode="out-in">
       <slot
-        :name="currentStep?.id ?? 'undefined'"
+        :name="currentStep?.id ?? 'fallback'"
         :current-step="currentStep"
         :next="next"
         :previous="previous"
@@ -284,7 +330,7 @@ defineExpose({
         :next-step="nextStep"
         :previous-step="previousStep"
       >
-        This step is not available
+        This step does not exist!
       </slot>
     </transition>
 

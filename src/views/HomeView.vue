@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import Stepper from '../components/Stepper.vue'
 
 const steps = reactive({
@@ -19,25 +19,30 @@ const steps = reactive({
   },
   final: {
     id: 'final-step',
-    onEnter: async () => {
+    onEnter: async (step) => {
       await new Promise<void>((resolve) => {
         setTimeout(() => {
+          step.title = 'test'
           resolve()
         }, 1000)
       })
     },
   },
 })
+const currentStepId = ref()
 </script>
 
 <template>
   <main>
-    <Stepper :steps="steps" restricted="allow-visited">
+    <h2>Current step: {{ currentStepId }}</h2>
+    <button @click="currentStepId = 'step3'">Go step 3</button>
+    <Stepper :steps="steps" restricted="allow-visited" v-model="currentStepId">
       <template #header-item="{ step, active }">
         <h3>
           {{ `${active ? '>' : ''}${step.title}` }}
         </h3>
         <div>Processing: {{ step.processing }}</div>
+        <div>Visited: {{ step.visited }}</div>
       </template>
 
       <template #step1>

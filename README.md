@@ -6,12 +6,14 @@ Vue Stappen (Vue Steps) is a pre-built component that serves as a foundation for
 <a href="https://www.npmjs.com/package/vue-stappen"><img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white"/></a>
 <a href="https://github.com/timyourivh/vue-stappen"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white"/></a>
 
-## Todos ✅
+## TODOs ✅
 - [x] Publish to npm
 - [x] Test in project
 - [x] Go public 
 - [x] Document events
-- [ ] Document dev env
+- [x] Add v-model support
+- [ ] Create proper dev environment
+- [ ] Document dev environment
 - [ ] Add typescript support
 
 ## Installation 🛠️
@@ -92,7 +94,7 @@ I've made it very easy to add steps to the stepper. Just create an object and ad
 ```vue
 <script setup>
 import stepper from 'components/stepper.vue'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 const steps = reactive({
   // Each one of these entries represent a step and it's config.
@@ -110,7 +112,7 @@ const steps = reactive({
 </script>
 ```
 
-Once the script is set up, you can create templates in the stepper with names matching the key or ID of each step:
+Once the script is set up, you can create templates in the stepper with names that match the key or ID of each step:
 
 ```vue
 <template>
@@ -131,7 +133,7 @@ Once the script is set up, you can create templates in the stepper with names ma
         <div>Next up: {{ nextStep.title }}</div>
       </div>
     </template>
-    <!-- If set, you can use a custom ID that differs from the key if necessary. -->
+    <!-- If set, you can use a custom ID that differ from the key if necessary. -->
     <template #select-seat>
       <div>
         <h3>Seat Information</h3>
@@ -164,7 +166,49 @@ Once the script is set up, you can create templates in the stepper with names ma
 |number|number|This is the number of the step and will always be +1 of the previous step, even if there are hidden steps.|
 |processing|boolean|This flag will be true during an event to indicate that it's busy. Useful for disabling buttons or navigation and such.|
 
-#### Events:
+### V-model:
+
+The component allows you to use a "v-model" value to control the stepper. Initially, this value should be a Vue ref that can either be unset (`null`, `undefined`) or contain a step ID from which the stepper will then start.
+
+```vue
+<script setup>
+import { reactive, ref } from 'vue'
+
+const steps = reactive({
+  step1: { },
+  step2: { },
+  step3: { 
+    id: 'custom-step-id'
+  },
+  step4: { },
+})
+
+// Start at first step defined (step1).
+const currentStep = ref(null)
+const currentStep = ref() 
+
+// Start from step 2.
+const currentStep = ref('step2') 
+
+// Manipulating the value will cause the stepper to navigate .
+const navigateToStep = () => {
+  currentStep.value = 'custom-step-id'
+}
+</script>
+
+<template>
+  <stepper v-model="currentStep" :steps="steps">
+    <!-- ... -->
+  </stepper>
+
+  <!-- Example of directly manipulating the stepper from the template -->
+  <button @click="currentStep = 'step2'">Take me to step 2</button>
+</template>
+```
+
+#### **Step** events:
+
+These callback events can be defined for each step to control access to the steps.
 
 |Key|Params|Description
 |-|-|-|
@@ -230,7 +274,15 @@ event since that will cause an infinite loop due to the event being triggered wh
 |-|-|-|
 |steps|object|A defentition for the steps that exist in the stepper. Each key represents a step and it's value the options/configuration for the step.|
 |header-class|string|Overwrite the parent of the header class to style the header to your needs.|
-|restricted|boolean\|string|Disable navigation to all steps from header (can still be overwritten by step itself by setting naviageble explicitly true). Set to "allow-visited" to allow only visited steps to be navigable.|
+|restricted|boolean\|string|Disable navigation to all steps from header (can still be overwritten by step itself by setting navigable explicitly true). Set to "allow-visited" to allow only visited steps to be navigable.|
+
+### Component events
+
+|Event|Params|Description|
+|-|-|-|
+|change|currentStep|Fires when successfully navigated to step|
+|next|currentStep|Fires when the next() method is called|
+|previous|currentStep|Fires when the previous() method is called|
 
 ## Contributing 🤝
 
