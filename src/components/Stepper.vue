@@ -309,7 +309,7 @@ const previous = () => {
  */
 watch(modelValue, (value) => {
   if (value && value !== currentStep.value.id) {
-    navigateToId(value)
+    navigateToId(value, true)
   }
 })
 
