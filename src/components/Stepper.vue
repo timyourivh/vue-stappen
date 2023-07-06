@@ -223,8 +223,7 @@ const navigateToIndex = async (index: number, force = false) => {
   if (
     continues &&
     steps.value[stepIndex.value]?.onLeave &&
-    !steps.value[stepIndex.value].navigable &&
-    force
+    (steps.value[index]?.navigable || force)
   ) {
     steps.value[stepIndex.value].processing = true
 

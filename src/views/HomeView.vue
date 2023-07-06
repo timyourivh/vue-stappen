@@ -27,6 +27,7 @@ const steps = reactive({
     onLeave,
   },
   final: {
+    // navigable: true,
     id: 'final-step',
     onLeave,
   },
