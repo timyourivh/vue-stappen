@@ -220,6 +220,8 @@ const previousStep = computed<Step | null>(() => {
 const navigateToIndex = async (index: number, force = false) => {
   let continues = true
 
+  emit('beforeChange', currentStep.value)
+
   if (
     continues &&
     steps.value[stepIndex.value]?.onLeave &&
@@ -335,7 +337,13 @@ defineExpose({
   previous,
   navigateToId,
 })
-const emit = defineEmits(['next', 'previous', 'change', 'update:modelValue'])
+const emit = defineEmits([
+  'next',
+  'previous',
+  'beforeChange',
+  'change',
+  'update:modelValue',
+])
 </script>
 
 <template>

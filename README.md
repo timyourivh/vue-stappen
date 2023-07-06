@@ -290,6 +290,7 @@ event since that will cause an infinite loop due to the event being triggered wh
 
 |Event|Params|Description|
 |-|-|-|
+|beforeChange|currentStep|Fires before navigation to any step and before any callbacks.|
 |change|currentStep|Fires when successfully navigated to step.|
 |next|currentStep|Fires when the next() method is called.|
 |previous|currentStep|Fires when the previous() method is called.|
