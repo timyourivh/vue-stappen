@@ -210,12 +210,20 @@ const navigateToStep = () => {
 
 These callback events can be defined for each step to control access to the steps.
 
+
 |Key|Params|Description
 |-|-|-|
-|`onEnter`|`currentStep`, `originStep`, `direction`|This event is triggered when trying to enter a step. Return true or false to decide if you can continue or not.|
-|`onLeave`|`currentStep`, `destinationStep`, `direction`|This event is triggered when trying to leave a step. Return true or false to decide if you can leave the step or not.|
+|`onEnter`|`stepEvent`|This event is triggered when trying to enter a step. Return true or false to decide if you can continue or not.|
+|`onLeave`|`stepEvent`|This event is triggered when trying to leave a step. Return true or false to decide if you can leave the step or not.|
 
-The `direction` property returned by this event is a number that indicates the direction of the stepper and the number of steps it is taking. A negative value represents moving backward, while a positive value represents moving forward. The absolute value represents the number of steps taken, regardless of the direction.
+The `stepEvent` is an object that contains relevant data and gives you the ability to destructut and access the following properties:
+
+|Prop|Description|
+|-|-|
+|`currentStep`|The current step.|
+|`sourceStep`|Represents the step we are moving from in the `onEnter` event and the step we are moving to in the `onLeave` event.|
+|`direction`|A number that indicates the direction of the stepper and the number of steps it is taking. A negative value represents moving backward, while a positive value represents moving forward. The absolute value represents the number of steps taken, regardless of the direction.|
+
 
 ## API reference 📖
 ### Templates

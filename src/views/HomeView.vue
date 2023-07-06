@@ -2,30 +2,26 @@
 import { reactive, ref } from 'vue'
 import Stepper from '../components/Stepper.vue'
 
+const onLeave = ({ currentStep, sourceStep, direction }) => {
+  console.log(currentStep.id, sourceStep.id, direction)
+}
+
 const steps = reactive({
   step1: {
-    onLeave: (_step, _destination, direction) => {
-      console.log(direction)
-    },
+    onLeave,
   },
   step2: {
     title: 'Async example',
-    onLeave: (_step, _destination, direction) => {
-      console.log(direction)
-    },
+    onLeave,
   },
   step3: {
     navigable: true,
-    onLeave: (_step, _destination, direction) => {
-      console.log(direction)
-    },
+    onLeave,
   },
   final: {
     id: 'final-step',
     navigable: true,
-    onLeave: (_step, _destination, direction) => {
-      console.log(direction)
-    },
+    onLeave,
   },
 })
 const currentStepId = ref()

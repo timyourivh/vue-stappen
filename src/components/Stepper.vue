@@ -42,29 +42,23 @@ interface Step {
 
   /**
    * Callback when entering a step.
-   * @param currentStep The current step.
-   * @param originStep The step we're navigation from.
-   * @param direction A number that indicates what direction we're going and how many steps were taken.
+   * @param stepEvent Step event.
    * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onEnter?: (
-    currentStep: Step,
-    originStep: Step,
-    direction: number | null
-  ) => EventReturnValue
+  onEnter?: (stepEvent: StepEvent) => EventReturnValue
 
   /**
    * Callback when leaving a step.
-   * @param currentStep The current step.
-   * @param destinationStep The step we're navigating to.
-   * @param direction A number that indicates what direction we're going and how many steps were taken.
+   * @param stepEvent Step event.
    * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onLeave?: (
-    currentStep: Step,
-    destinationStep: Step,
-    direction: number | null
-  ) => EventReturnValue
+  onLeave?: (stepEvent: StepEvent) => EventReturnValue
+}
+
+interface StepEvent {
+  currentStep: Step // Current step.
+  sourceStep: Step // Origin/Destination step.
+  direction: number | null // A number that indicates what direction we're going and how many steps were taken. Null means one of the steps doesn't exist.
 }
 
 type EventReturnValue = boolean | void | Promise<boolean> | Promise<void>
@@ -166,6 +160,19 @@ const computeDirection = (
 }
 
 /**
+ * A helper method for constructing the event that is passed to the step events
+ * @param currentStep The current step.
+ * @param sourceStep The Origin/Destination step.
+ */
+const constructStepEvent = (currentStep, sourceStep): StepEvent => {
+  return {
+    currentStep,
+    sourceStep,
+    direction: computeDirection(currentStep.id, sourceStep.id),
+  }
+}
+
+/**
  * Define a current index which will be the one truth on what step we are.
  * Default will be modelValue step found by Id or zero.
  */
@@ -222,12 +229,7 @@ const navigateToIndex = async (index: number, force = false) => {
     try {
       continues =
         (await steps.value[stepIndex.value]?.onLeave?.(
-          steps.value[stepIndex.value],
-          steps.value[index],
-          computeDirection(
-            steps.value[stepIndex.value].id,
-            steps.value[index].id
-          )
+          constructStepEvent(steps.value[stepIndex.value], steps.value[index])
         )) !== false
     } catch (error) {
       console.error(
@@ -250,12 +252,7 @@ const navigateToIndex = async (index: number, force = false) => {
     try {
       continues =
         (await steps.value[index]?.onEnter?.(
-          steps.value[index],
-          steps.value[stepIndex.value],
-          computeDirection(
-            steps.value[index].id,
-            steps.value[stepIndex.value].id
-          )
+          constructStepEvent(steps.value[index], steps.value[stepIndex.value])
         )) !== false
     } catch (error) {
       console.error(
