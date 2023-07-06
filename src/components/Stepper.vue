@@ -213,7 +213,12 @@ const previousStep = computed<Step | null>(() => {
 const navigateToIndex = async (index: number, force = false) => {
   let continues = true
 
-  if (continues && steps.value[stepIndex.value]?.onLeave) {
+  if (
+    continues &&
+    steps.value[stepIndex.value]?.onLeave &&
+    !steps.value[stepIndex.value].navigable &&
+    force
+  ) {
     steps.value[stepIndex.value].processing = true
 
     // Check if onLeave callback exists and execute it.
