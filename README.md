@@ -222,7 +222,7 @@ The `stepEvent` is an object that contains relevant data and gives you the abili
 |-|-|
 |`currentStep`|The current step.|
 |`sourceStep`|Represents the step we are moving from in the `onEnter` event and the step we are moving to in the `onLeave` event.|
-|`direction`|A number that indicates the direction of the stepper and the number of steps it is taking. A negative value represents moving backward, while a positive value represents moving forward. The absolute value represents the number of steps taken, regardless of the direction.|
+|`direction`|A value that is either a number or null which indicates the direction of the stepper and the number of steps it is taking. A negative value represents moving backward, while a positive value represents moving forward. The absolute value represents the number of steps taken, regardless of the direction. Null means the sourceStep is non-existent.|
 
 
 ## API reference 📖

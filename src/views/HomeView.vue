@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue'
 import Stepper from '../components/Stepper.vue'
 
 const onLeave = ({ currentStep, sourceStep, direction }) => {
-  console.log(currentStep.id, sourceStep.id, direction)
+  console.log(currentStep?.id, sourceStep?.id, direction)
 }
 
 const steps = reactive({
