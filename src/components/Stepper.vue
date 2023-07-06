@@ -42,17 +42,29 @@ interface Step {
 
   /**
    * Callback when entering a step.
-   * @param step The current step.
+   * @param currentStep The current step.
+   * @param originStep The step we're navigation from.
+   * @param direction A number that indicates what direction we're going and how many steps were taken.
    * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onEnter?: (step: Step) => EventReturnValue
+  onEnter?: (
+    currentStep: Step,
+    originStep: Step,
+    direction: number | null
+  ) => EventReturnValue
 
   /**
    * Callback when leaving a step.
-   * @param step The current step.
+   * @param currentStep The current step.
+   * @param destinationStep The step we're navigating to.
+   * @param direction A number that indicates what direction we're going and how many steps were taken.
    * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onLeave?: (step: Step) => EventReturnValue
+  onLeave?: (
+    currentStep: Step,
+    destinationStep: Step,
+    direction: number | null
+  ) => EventReturnValue
 }
 
 type EventReturnValue = boolean | void | Promise<boolean> | Promise<void>
@@ -92,10 +104,16 @@ const props = withDefaults(
   }
 )
 
-// Configure prop defaults
+/**
+ * Setup property variables.
+ */
 const headerClass = props.headerClass || 'vue-stappen-header'
+const modelValue = computed(() => props.modelValue)
 
-// Construct internal steps array.
+/**
+ * This is the bootstrapper for the steps. It turns the property object into an
+ * array and normalizes it. This is where I set defaults.
+ */
 const steps = computed<Array<InternalStep>>(() => {
   return Object.entries(props.steps)
     .map(([key, step]) => {
@@ -119,13 +137,40 @@ const steps = computed<Array<InternalStep>>(() => {
 })
 
 /**
+ * A helper method to get the index of a step based on it's id.
+ * @param id Step id of the step you want the index for.
+ */
+const getStepIndexById = (id: string): number => {
+  return steps.value.findIndex((step: Step) => step.id === id)
+}
+
+/**
+ * This is a helper method that computes the direction and number of steps between two given steps.
+ * @param currentStepId id of the step we are moving from.
+ * @param destinationStepId id of the step we're moving to.
+ */
+const computeDirection = (
+  currentStepId: string,
+  destinationStepId: string
+): null | number => {
+  const currentIndex = getStepIndexById(currentStepId)
+  const destinationIndex = getStepIndexById(destinationStepId)
+
+  if (currentIndex === -1 || destinationIndex === -1) {
+    // Either currentStep or destination is not found in the array.
+    return null
+  } else {
+    // Return direction and steps taken.
+    return destinationIndex - currentIndex
+  }
+}
+
+/**
  * Define a current index which will be the one truth on what step we are.
  * Default will be modelValue step found by Id or zero.
  */
 const stepIndex = ref<number>(
-  props.modelValue
-    ? steps.value.findIndex((step: Step) => step.id === props.modelValue)
-    : 0
+  props.modelValue ? getStepIndexById(props.modelValue) : 0
 )
 
 /**
@@ -177,7 +222,12 @@ const navigateToIndex = async (index: number, force = false) => {
     try {
       continues =
         (await steps.value[stepIndex.value]?.onLeave?.(
-          steps.value[stepIndex.value]
+          steps.value[stepIndex.value],
+          steps.value[index],
+          computeDirection(
+            steps.value[stepIndex.value].id,
+            steps.value[index].id
+          )
         )) !== false
     } catch (error) {
       console.error(
@@ -199,7 +249,14 @@ const navigateToIndex = async (index: number, force = false) => {
     // The result of the method determines if allowed to continue.
     try {
       continues =
-        (await steps.value[index]?.onEnter?.(steps.value[index])) !== false
+        (await steps.value[index]?.onEnter?.(
+          steps.value[index],
+          steps.value[stepIndex.value],
+          computeDirection(
+            steps.value[index].id,
+            steps.value[stepIndex.value].id
+          )
+        )) !== false
     } catch (error) {
       console.error(
         `Uncaught error in onEnter event on step ${
@@ -230,10 +287,7 @@ const navigateToIndex = async (index: number, force = false) => {
  * @param force Override to force navigation if navigable is false.
  */
 const navigateToId = (stepId: string, force = false) => {
-  navigateToIndex(
-    steps.value.findIndex((step: Step) => step.id === stepId),
-    force
-  )
+  navigateToIndex(getStepIndexById(stepId), force)
 }
 
 /**
@@ -256,8 +310,8 @@ const previous = () => {
  * Watch the current step id, it is directly linked to the modelvalue.
  * Navigate when this value changes.
  */
-watch(currentStepId, (value) => {
-  if (value) {
+watch(modelValue, (value) => {
+  if (value && value !== currentStep.value.id) {
     navigateToId(value)
   }
 })

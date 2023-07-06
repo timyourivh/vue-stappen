@@ -15,5 +15,6 @@ module.exports = {
   rules: {
     'no-unused-vars': ['error', { args: 'none' }],
     'vue/multi-word-component-names': ['off'],
+    'no-console': ['warn', { allow: ['error', 'warn'] }], // Disallow console.log() as this is a develoment tool.
   },
 }

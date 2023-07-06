@@ -212,8 +212,10 @@ These callback events can be defined for each step to control access to the step
 
 |Key|Params|Description
 |-|-|-|
-|onEnter|step|This event is triggered when trying to enter a step. Return true or false to decide if you can continue or not.|
-|onLeave|step|This event is triggered when trying to leave a step. Return true or false to decide if you can leave the step or not.|
+|`onEnter`|`currentStep`, `originStep`, `direction`|This event is triggered when trying to enter a step. Return true or false to decide if you can continue or not.|
+|`onLeave`|`currentStep`, `destinationStep`, `direction`|This event is triggered when trying to leave a step. Return true or false to decide if you can leave the step or not.|
+
+The `direction` property returned by this event is a number that indicates the direction of the stepper and the number of steps it is taking. A negative value represents moving backward, while a positive value represents moving forward. The absolute value represents the number of steps taken, regardless of the direction.
 
 ## API reference 📖
 ### Templates
@@ -280,9 +282,9 @@ event since that will cause an infinite loop due to the event being triggered wh
 
 |Event|Params|Description|
 |-|-|-|
-|change|currentStep|Fires when successfully navigated to step|
-|next|currentStep|Fires when the next() method is called|
-|previous|currentStep|Fires when the previous() method is called|
+|change|currentStep|Fires when successfully navigated to step.|
+|next|currentStep|Fires when the next() method is called.|
+|previous|currentStep|Fires when the previous() method is called.|
 
 ## Contributing 🤝
 

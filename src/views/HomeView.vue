@@ -3,29 +3,28 @@ import { reactive, ref } from 'vue'
 import Stepper from '../components/Stepper.vue'
 
 const steps = reactive({
-  step1: {},
+  step1: {
+    onLeave: (_step, _destination, direction) => {
+      console.log(direction)
+    },
+  },
   step2: {
     title: 'Async example',
-    onLeave: async () => {
-      await new Promise<void>((resolve) => {
-        setTimeout(() => {
-          resolve()
-        }, 1000)
-      })
+    onLeave: (_step, _destination, direction) => {
+      console.log(direction)
     },
   },
   step3: {
     navigable: true,
+    onLeave: (_step, _destination, direction) => {
+      console.log(direction)
+    },
   },
   final: {
     id: 'final-step',
-    onEnter: async (step) => {
-      await new Promise<void>((resolve) => {
-        setTimeout(() => {
-          step.title = 'test'
-          resolve()
-        }, 1000)
-      })
+    navigable: true,
+    onLeave: (_step, _destination, direction) => {
+      console.log(direction)
     },
   },
 })
