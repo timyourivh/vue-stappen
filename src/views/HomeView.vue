@@ -12,15 +12,22 @@ const steps = reactive({
   },
   step2: {
     title: 'Async example',
+    navigable: true,
     onLeave,
+    onEnter: async () => {
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(null)
+        }, 2000)
+      })
+    },
   },
   step3: {
-    navigable: true,
+    navigable: false,
     onLeave,
   },
   final: {
     id: 'final-step',
-    navigable: true,
     onLeave,
   },
 })

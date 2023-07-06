@@ -172,12 +172,19 @@ const constructStepEvent = (currentStep, sourceStep): StepEvent => {
   }
 }
 
+const setVisitInitialStep = (index: number) => {
+  steps.value[index].visited = true
+  return index
+}
+
 /**
  * Define a current index which will be the one truth on what step we are.
  * Default will be modelValue step found by Id or zero.
  */
 const stepIndex = ref<number>(
-  props.modelValue ? getStepIndexById(props.modelValue) : 0
+  props.modelValue
+    ? setVisitInitialStep(getStepIndexById(props.modelValue))
+    : setVisitInitialStep(0)
 )
 
 /**
@@ -272,11 +279,8 @@ const navigateToIndex = async (index: number, force = false) => {
     steps.value[index].processing = false
   }
 
-  if (steps.value[stepIndex.value]) {
-    steps.value[stepIndex.value].visited = true
-  }
-
   if (steps.value[index] && continues === true) {
+    steps.value[index].visited = true
     stepIndex.value = index
     emit('change', currentStep.value)
     currentStepId.value = currentStep.value.id // Emits update model value
