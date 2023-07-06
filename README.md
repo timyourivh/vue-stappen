@@ -61,7 +61,7 @@ Vue Stappen (Vue Steps) is a pre-built component that serves as a foundation for
 
     <template>
       <Stepper v-bind="$props">
-        <template #header="{ step, active }">
+        <template #header-item="{ step, active }">
           <div class="p-3" :class="{ 'cursor-pointer': step.navigable, 'text-gray-500': !step.navigable }">
               <div class="text-2xl" :class="{ 'text-primary': active }" v-text="step.title" />
           </div>
