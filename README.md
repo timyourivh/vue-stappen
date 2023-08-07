@@ -133,7 +133,7 @@ Once the script is set up, you can create templates in the stepper with names th
         <div>Next up: {{ nextStep.title }}</div>
       </div>
     </template>
-    <!-- If set, you can use a custom ID that differ from the key if necessary. -->
+    <!-- If set, you can use a custom ID that differs from the key if necessary. -->
     <template #select-seat>
       <div>
         <h3>Seat Information</h3>
