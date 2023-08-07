@@ -4,6 +4,7 @@ import Stepper from '../components/Stepper.vue'
 
 const onLeave = ({ currentStep, sourceStep, direction }) => {
   console.log(currentStep?.id, sourceStep?.id, direction)
+  return true
 }
 
 const steps = reactive({
@@ -13,13 +14,9 @@ const steps = reactive({
   step2: {
     title: 'Async example',
     navigable: true,
-    onLeave,
-    onEnter: async () => {
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(null)
-        }, 2000)
-      })
+    onForward: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      return test.value !== ''
     },
   },
   step3: {
@@ -33,6 +30,8 @@ const steps = reactive({
   },
 })
 const currentStepId = ref()
+
+const test = ref('')
 </script>
 
 <template>
@@ -44,15 +43,20 @@ const currentStepId = ref()
         <h3>
           {{ `${active ? '>' : ''}${step.title}` }}
         </h3>
-        <div>Processing: {{ step.processing }}</div>
-        <div>Visited: {{ step.visited }}</div>
+        <small>
+          <div>Processing: {{ step.processing }}</div>
+          <div>Visited: {{ step.visited }}</div>
+          <div>Navigable: {{ step.navigable }}</div>
+        </small>
       </template>
 
       <template #step1>
         <div>This is step 1</div>
       </template>
       <template #step2>
-        <div>This is step 2</div>
+        <div>
+          <input type="text" v-model="test" />
+        </div>
       </template>
       <template #step3>
         <div>This is step 3</div>

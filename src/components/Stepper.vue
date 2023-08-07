@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import startCase from 'lodash.startcase'
+import Superchain from 'superchain'
 
 interface Step {
   /**
@@ -42,20 +43,48 @@ interface Step {
 
   /**
    * Callback when entering a step.
-   * @param stepEvent Step event.
+   * @param context Step event.
    * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onEnter?: (stepEvent: StepEvent) => EventReturnValue
+  onEnter?: (context: StepEventContext) => EventReturnValue
 
   /**
    * Callback when leaving a step.
-   * @param stepEvent Step event.
+   * @param context Step event.
    * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
    */
-  onLeave?: (stepEvent: StepEvent) => EventReturnValue
+  onLeave?: (context: StepEventContext) => EventReturnValue
+
+  /**
+   * Callback when moving to the next step.
+   * @param context Step event.
+   * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
+   */
+  onNext?: (context: StepEventContext) => EventReturnValue
+
+  /**
+   * Callback when moving to the previous step.
+   * @param context Step event.
+   * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
+   */
+  onPrevious?: (context: StepEventContext) => EventReturnValue
+
+  /**
+   * Callback when moving forward.
+   * @param context Step event.
+   * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
+   */
+  onForward?: (context: StepEventContext) => EventReturnValue
+
+  /**
+   * Callback when moving backward.
+   * @param context Step event.
+   * @returns {boolean|null|Promise} (expected) Boolean (or promise) which determines if the stepper hould continue or not depending on true/false respectively or null which would be the same as true.
+   */
+  onBackward?: (context: StepEventContext) => EventReturnValue
 }
 
-interface StepEvent {
+interface StepEventContext {
   currentStep: Step // Current step.
   sourceStep: Step // Origin/Destination step.
   direction: number | null // A number that indicates what direction we're going and how many steps were taken. Null means one of the steps doesn't exist.
@@ -159,19 +188,6 @@ const computeDirection = (
   }
 }
 
-/**
- * A helper method for constructing the event that is passed to the step events
- * @param currentStep The current step.
- * @param sourceStep The Origin/Destination step.
- */
-const constructStepEvent = (currentStep, sourceStep): StepEvent => {
-  return {
-    currentStep,
-    sourceStep,
-    direction: computeDirection(currentStep?.id, sourceStep?.id),
-  }
-}
-
 const setVisitInitialStep = (index: number) => {
   steps.value[index].visited = true
   return index
@@ -194,7 +210,7 @@ const stepIndex = ref<number>(
 const currentStepNumber = computed<number>(() => {
   return stepIndex.value + 1
 })
-const currentStep = computed<Step>(() => {
+const currentStep = computed<InternalStep>(() => {
   return steps.value[stepIndex.value]
 })
 const currentStepId = computed({
@@ -205,10 +221,10 @@ const currentStepId = computed({
     emit('update:modelValue', value)
   },
 })
-const nextStep = computed<Step | null>(() => {
+const nextStep = computed<InternalStep | null>(() => {
   return steps.value[stepIndex.value + 1] ?? null
 })
-const previousStep = computed<Step | null>(() => {
+const previousStep = computed<InternalStep | null>(() => {
   return steps.value[stepIndex.value - 1] ?? null
 })
 
@@ -216,75 +232,114 @@ const previousStep = computed<Step | null>(() => {
  * Method to navigate stepper to given index.
  * @param index Index of the step you want to navigate to.
  * @param force Override to force navigation if navigable is false.
+ * @param direction Override for direction, used by next and previous to allow for onNext and onPrevious callback when source step doesn't exist. If null it will be computed.
  */
-const navigateToIndex = async (index: number, force = false) => {
-  let continues = true
+const navigateToIndex = async (
+  index: number,
+  force = false,
+  direction?: number
+) => {
+  // Construct the chain.
+  const chain = new Superchain()
 
-  emit('beforeChange', currentStep.value)
+  // Define contextual current and source steps.
+  const currentStep = steps.value[stepIndex.value]
+  const sourceStep = steps.value[index]
 
-  if (
-    continues &&
-    steps.value[stepIndex.value]?.onLeave &&
-    (steps.value[index]?.navigable || force)
-  ) {
-    steps.value[stepIndex.value].processing = true
-
-    // Check if onLeave callback exists and execute it.
-    // The result of the method determines if allowed to continue.
-    try {
-      continues =
-        (await steps.value[stepIndex.value]?.onLeave?.(
-          constructStepEvent(steps.value[stepIndex.value], steps.value[index])
-        )) !== false
-    } catch (error) {
-      console.error(
-        `Uncaught error in onLeave event on step ${
-          steps.value[stepIndex.value].id
-        } -`,
-        error
-      )
-      continues = false
-    }
-
-    steps.value[stepIndex.value].processing = false
+  // Define the context that will be passed to EVERY event.
+  const context: StepEventContext = {
+    currentStep,
+    sourceStep,
+    direction: direction ?? computeDirection(currentStep?.id, sourceStep?.id),
   }
 
-  if (
-    continues &&
-    (!steps.value[index] || // Checks if the step even exists.
-      steps.value[index].disabled || // Checks if the step is diabled
-      (!steps.value[index].navigable && !force)) // Check if you can navigate to step from header and without override.
+  // Guard when leaving step.
+  chain.add((context: StepEventContext, next) =>
+    handleCallback(currentStep, context, next, 'onLeave')
   )
-    continues = false
 
-  if (continues && steps.value[index] && steps.value[index]?.onEnter) {
-    steps.value[index].processing = true
+  // Check if source step even exists and if it is navigable.
+  chain.add((context: StepEventContext, next) => {
+    if (sourceStep && (sourceStep.navigable || force)) next()
+    // If the source step doesn't exist, check if it's the last step.
+    else if (index + 1 > steps.value.length) emit('finish', context)
+  })
 
-    // Check if onEnter callback exists on the requested index and execute it.
-    // The result of the method determines if allowed to continue.
-    try {
-      continues =
-        (await steps.value[index]?.onEnter?.(
-          constructStepEvent(steps.value[index], steps.value[stepIndex.value])
-        )) !== false
-    } catch (error) {
-      console.error(
-        `Uncaught error in onEnter event on step ${
-          steps.value[stepIndex.value].id
-        } -`,
-        error
-      )
-      continues = false
+  if (context.direction) {
+    // Guard next step.
+    if (context.direction === 1) {
+      chain.add((context: StepEventContext, next) => {
+        handleCallback(currentStep, context, next, 'onNext')
+        emit('next', context)
+      })
     }
 
-    steps.value[index].processing = false
+    // Guard any step forward.
+    if (context.direction >= 1) {
+      chain.add((context: StepEventContext, next) => {
+        handleCallback(currentStep, context, next, 'onForward')
+        emit('forward', context)
+      })
+    }
+
+    // Guard previous step.
+    if (context.direction === -1) {
+      chain.add((context: StepEventContext, next) => {
+        handleCallback(currentStep, context, next, 'onPrevious')
+        emit('previous', context)
+      })
+    }
+
+    // Guard any step backward.
+    if (context.direction <= -1) {
+      chain.add((context: StepEventContext, next) => {
+        handleCallback(currentStep, context, next, 'onBackward')
+        emit('backward', context)
+      })
+    }
   }
 
-  if (steps.value[index] && continues === true) {
+  // Guard source step.
+  chain.add((context: StepEventContext, next) =>
+    handleCallback(sourceStep, context, next, 'onEnter')
+  )
+
+  // Performing the move.
+  chain.final((context: StepEventContext) => {
     steps.value[index].visited = true
     stepIndex.value = index
-    emit('change', currentStep.value)
-    currentStepId.value = currentStep.value.id // Emits update model value
+    emit('change', context)
+    currentStepId.value = sourceStep.id
+  })
+
+  // Run the chain.
+  chain.run(context)
+}
+
+/**
+ * A method that calls a callback by name on a step if it exists.
+ *
+ * @param step The step the event should be called on.
+ * @param context The context that will be passed to the event.
+ * @param next Callback for passing the middleware.
+ * @param callbackName Name of the callback.
+ */
+const handleCallback = async (
+  step: InternalStep,
+  context: StepEventContext,
+  next: () => void,
+  callbackName: string
+) => {
+  if (step[callbackName]) {
+    step.processing = true
+    const callbackResult = await step[callbackName](context)
+    step.processing = false
+
+    if (callbackResult !== false) {
+      next()
+    }
+  } else {
+    next()
   }
 }
 
@@ -300,17 +355,15 @@ const navigateToId = (stepId: string, force = false) => {
 /**
  * Method to naviagate to the next step.
  */
-const next = () => {
-  emit('next', currentStep.value)
-  navigateToIndex(stepIndex.value + 1, true)
+const next = (stepSize = 1) => {
+  navigateToIndex(stepIndex.value + stepSize, true, stepSize)
 }
 
 /**
  * Method to naviagate to the next previous step.
  */
-const previous = () => {
-  emit('previous', currentStep.value)
-  navigateToIndex(stepIndex.value - 1, true)
+const previous = (stepSize = 1) => {
+  navigateToIndex(stepIndex.value - stepSize, true, -stepSize)
 }
 
 /**
@@ -337,11 +390,14 @@ defineExpose({
   previous,
   navigateToId,
 })
+
 const emit = defineEmits([
   'next',
+  'forward',
+  'backward',
   'previous',
-  'beforeChange',
   'change',
+  'finish',
   'update:modelValue',
 ])
 </script>
@@ -411,8 +467,18 @@ const emit = defineEmits([
         :next-step="nextStep"
         :previous-step="previousStep"
       >
-        <button @click="previous">previous</button>
-        <button @click="next">next</button>
+        <button
+          @click="previous()"
+          :disabled="currentStep.processing || previousStep?.processing"
+        >
+          previous
+        </button>
+        <button
+          @click="next()"
+          :disabled="currentStep.processing || nextStep?.processing"
+        >
+          next
+        </button>
       </slot>
     </div>
   </div>
