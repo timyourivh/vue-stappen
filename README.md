@@ -229,16 +229,16 @@ You are free to add any custom properties if you need them inside your header, c
 
 ### Step callback middleware
 
-Steps allow for optional callbacks to be configured, these callbacks also double as middleware. Explicitly returning `false` will stop continuation of navigation and events further down the line. Below you can find a list of events in **chronological order**. Every callback receives a [context object](#context-object) as parameter.
+Steps allow for optional callbacks to be configured, these callbacks also double as middleware. Explicitly returning `false` will stop continuation of navigation and events further down the line. Below you can find a list of events in **chronological order**. Every callback receives a [context object](#context-object) as parameter. If a source step is not `navigable`, no callback will be called.
 
 |Name|Description|
 |-|-|
 |`onLeave`|Triggers when leaving step.|
+|`onEnter`|Triggers when entering step.|
 |`onNext`|Triggers when navigating to the very next step.|
 |`onForward`|Triggers when navigating any steps forwards.|
 |`onPrevious`|Triggers when navigating to the immediately preceding step.|
 |`onBackward`|Triggers when navigating any steps backwards.|
-|`onEnter`|Triggers when entering step.|
 
 ### Component templates
 
@@ -261,7 +261,8 @@ Every events receives a [context object](#context-object) as parameter.
 |`backward`|Fires when navigating any steps backwards.|
 |`previous`|Fires when navigating to the immediately preceding step.|
 |`change`|Fires current step has changed.|
-|`finish`|Fires on next at the last step.|
+|`finish`|Fires only on the "last" step, wich is determined if there are no more "next" steps.|
+
 ### Context object
 
 A context object is an object that will be passed to both [component events](#component-events) and [step callbacks](#step-callback-middleware).

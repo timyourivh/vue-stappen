@@ -253,20 +253,26 @@ const navigateToIndex = async (
     direction: direction ?? computeDirection(currentStep?.id, sourceStep?.id),
   }
 
+  // Check if source step even exists and if it is navigable.
+  chain.add((context: StepEventContext, next) => {
+    if (sourceStep && (sourceStep.navigable || force)) next()
+    // If the source step doesn't exist, check if it's the last step and emit event if so.
+    else if (index + 1 > steps.value.length) emit('finish', context)
+  })
+
   // Guard when leaving step.
   chain.add((context: StepEventContext, next) =>
     handleCallback(currentStep, context, next, 'onLeave')
   )
 
-  // Check if source step even exists and if it is navigable.
-  chain.add((context: StepEventContext, next) => {
-    if (sourceStep && (sourceStep.navigable || force)) next()
-    // If the source step doesn't exist, check if it's the last step.
-    else if (index + 1 > steps.value.length) emit('finish', context)
-  })
+  // Guard source step.
+  chain.add((context: StepEventContext, next) =>
+    handleCallback(sourceStep, context, next, 'onEnter')
+  )
 
+  // Directional callbacks from step.
   if (context.direction) {
-    // Guard next step.
+    // Guard very next step.
     if (context.direction === 1) {
       chain.add((context: StepEventContext, next) => {
         handleCallback(currentStep, context, next, 'onNext')
@@ -282,7 +288,7 @@ const navigateToIndex = async (
       })
     }
 
-    // Guard previous step.
+    // Guard immediately preceding step.
     if (context.direction === -1) {
       chain.add((context: StepEventContext, next) => {
         handleCallback(currentStep, context, next, 'onPrevious')
@@ -298,11 +304,6 @@ const navigateToIndex = async (
       })
     }
   }
-
-  // Guard source step.
-  chain.add((context: StepEventContext, next) =>
-    handleCallback(sourceStep, context, next, 'onEnter')
-  )
 
   // Performing the move.
   chain.final((context: StepEventContext) => {

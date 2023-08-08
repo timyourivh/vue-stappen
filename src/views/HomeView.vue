@@ -14,6 +14,7 @@ const steps = reactive({
   step2: {
     title: 'Async example',
     navigable: true,
+    onLeave,
     onForward: async () => {
       await new Promise((resolve) => setTimeout(resolve, 500))
       return test.value !== ''
@@ -27,18 +28,31 @@ const steps = reactive({
     // navigable: true,
     id: 'final-step',
     onLeave,
+    onNext: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      console.log('Next? there is no next....')
+    },
   },
 })
 const currentStepId = ref()
 
 const test = ref('')
+
+const onFinish = () => {
+  console.log('Submitting data...')
+}
 </script>
 
 <template>
   <main>
     <h2>Current step: {{ currentStepId }}</h2>
     <button @click="currentStepId = 'step3'">Go step 3</button>
-    <Stepper :steps="steps" restricted="allow-visited" v-model="currentStepId">
+    <Stepper
+      :steps="steps"
+      restricted="allow-visited"
+      v-model="currentStepId"
+      @finish="onFinish()"
+    >
       <template #header-item="{ step, active }">
         <h3>
           {{ `${active ? '>' : ''}${step.title}` }}
