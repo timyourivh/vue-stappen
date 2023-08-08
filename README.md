@@ -12,6 +12,7 @@ Vue Stappen (Vue Steps) is a pre-built component that serves as a foundation for
 - [x] Go public 
 - [x] Document events
 - [x] Add v-model support
+- [x] Add more events :)
 - [ ] Create proper dev environment
 - [ ] Document dev environment
 - [ ] Add typescript support
@@ -89,7 +90,7 @@ Vue Stappen (Vue Steps) is a pre-built component that serves as a foundation for
 
 ### Steps
 
-I've made it very easy to add steps to the stepper. Just create an object and add entries to it that will represent the config of the steps:
+Creating steps is very easy. Just create a (reactive) object and add entries to it. Each key defines a step and each value represents the config of that [step](#step):
 
 ```vue
 <script setup>
@@ -103,10 +104,10 @@ const steps = reactive({
     id: 'select-seat',
   },
   payment: { 
-    customProp: 'You can add custom props to use in your skeleton',
+    customProp: 'You can add custom props to use in your skeleton or step content.',
   }, 
   confirmation: {
-    onLeave: () => { /* Submit, Validation, etc... */ },
+    onNext: () => { /* Submit, Validation, etc... */ },
   },
 })
 </script>
@@ -146,25 +147,6 @@ Once the script is set up, you can create templates in the stepper with names th
   </stepper>
 </template>
 ```
-
-#### These are the options for a step:
-
-|Key|Type|Default|Description|
-|-|-|-|-|
-|id|string|Key of the step|Override for the key, which will be used as ID if this option is not set.|
-|show|boolean|`true`|A toggle for showing/hiding the step. If false, the step can't be accessed and won't be visible.|
-|disabled|boolean|`false`|A toggle for disabling/enabling the step. If true, the step is still visible but inaccessible.|
-|navigable|boolean|`true`|A toggle for allowing navigation to the step from the top navigation. If false, the step can't be accessed by clicking its top navigation entry.|
-|title|string|The ID converted to start case|This option will use a start case version of the ID by default, which can be useful to get 2 birds with 1 stone. If set, it will be overwritten, of course.|
-|visited|boolean|false|A flag that can be useful to toggle steps as "visited". It will automatically be set to `true` when successfully leaving a step.|
-|-|-|-|You are not limited to these options and are free to add any custom props that you could use in the template, header items, or footer, as these will be present on the  `currentStep`, `previousStep`* and `nextStep`*. <hr /> * = Only if present! Use `?.` to access props to prevent errors.|
-
-#### These are properties that can't be set but are accessible on the step:
-
-|Key|Type|Description|
-|-|-|-|
-|number|number|This is the number of the step and will always be +1 of the previous step, even if there are hidden steps.|
-|processing|boolean|This flag will be true during an event to indicate that it's busy. Useful for disabling buttons or navigation and such.|
 
 ### V-model:
 
@@ -206,48 +188,91 @@ const navigateToStep = () => {
 </template>
 ```
 
-#### **Step** events:
-
-These callback events can be defined for each step to control access to the steps.
-
-
-|Key|Params|Description
-|-|-|-|
-|`onEnter`|`stepEvent`|This event is triggered when trying to enter a step. Return true or false to decide if you can continue or not.|
-|`onLeave`|`stepEvent`|This event is triggered when trying to leave a step. Return true or false to decide if you can leave the step or not.|
-
-The `stepEvent` is an object that contains relevant data and gives you the ability to destructut and access the following properties:
-
-|Prop|Description|
-|-|-|
-|`currentStep`|The current step.|
-|`sourceStep`|Represents the step we are moving from in the `onEnter` event and the step we are moving to in the `onLeave` event.|
-|`direction`|A value that is either a number or null which indicates the direction of the stepper and the number of steps it is taking. A negative value represents moving backward, while a positive value represents moving forward. The absolute value represents the number of steps taken, regardless of the direction. Null means the sourceStep is non-existent.|
-
-
 ## API reference 📖
-### Templates
+
+
+### Component properties
+
+|Prop|Type|Description|
+|-|-|-|
+|`steps`|object|A defentition for the steps that exist in the stepper. Each key defined represents a step and it's should contain a [step](#step).|
+|`header-class`|string|Overwrite the parent of the header class to style the header to your needs.|
+|`restricted`|boolean\|string|Disable navigation to all steps from header (can still be overwritten by step itself by setting navigable explicitly true). Set to "`allow-visited`" to allow only visited steps to be navigable.|
+### Step
+
+#### Options
+
+Listed below are the available options for a step.
+
+|Key|Type|Default|Description|
+|-|-|-|-|
+|`id`|string|Key of the step|Define an ID for the step which will reference the template name, if null the key of the step will be used instead.|
+|`show`|boolean|`true`|A toggle for showing/hiding the step. If false, the step can't be accessed and won't be visible.|
+|`disabled`|boolean|`false`|A toggle for disabling/enabling the step. If true, the step is still visible but inaccessible.|
+|`navigable`|boolean|`true`|A toggle for allowing navigation to the step from the top navigation. If false, the step can't be accessed by clicking its top navigation entry.|
+|`title`|string|The ID converted to start case|A title for the step, if undefined it will use a start case version of the ID.|
+|`visited`|boolean|`false`|A flag that can be useful to mark steps as "visited". It will automatically be set to `true` when successfully entering a step.|
+
+
+#### Default properties
+
+Properies that are auto-set, these can't be overwritten!
+
+|Key|Type|Description|
+|-|-|-|
+|number|number|This is the number of the step and will always be +1 of the previous step, even if there are hidden steps.|
+|processing|boolean|This flag will be true during an event to indicate that it's busy. Useful for disabling buttons or navigation and such.|
+
+#### Custom properties
+
+You are free to add any custom properties if you need them inside your header, content or wherever a step is referenced. If your steps object is reactive, you can manipulate these props and their changes will update directly.
+
+### Step callback middleware
+
+Steps allow for optional callbacks to be configured, these callbacks also double as middleware. Explicitly returning `false` will stop continuation of navigation and events further down the line. Below you can find a list of events in **chronological order**. Every callback receives a [context object](#context-object) as parameter. If a source step is not `navigable`, no callback will be called.
+
+|Name|Description|
+|-|-|
+|`onLeave`|Triggers when leaving step.|
+|`onEnter`|Triggers when entering step.|
+|`onNext`|Triggers when navigating to the very next step.|
+|`onForward`|Triggers when navigating any steps forwards.|
+|`onPrevious`|Triggers when navigating to the immediately preceding step.|
+|`onBackward`|Triggers when navigating any steps backwards.|
+
+### Component templates
 
 The package provides flexibility through customizable templates.
 
 |Template|Template name|Propeties|Description
 |-|-|-|-|
 |Header Item|`header-item`|`step`, `active`|This template exists within a loop with the purpose of displaying the header items.|
-|Step|(Variable)|`currentStep`, `next()`, `previous()`, `navigateToId(stepId)`, `nextStep`, `previousStep`|This template is used to define the content for the steps.|
-|Footer|`footer`|`currentStep`, `next()`, `previous()`, `navigateToId(stepId)`, `nextStep`, `previousStep`|This template is used to dress up the bottom naviagtion of the stepper. For example, this is where you would put the "previous" and "next" buttons.|
+|Step|(Variable)|`currentStep`, `next(amount)`, `previous(amount)`, `navigateToId(stepId)`, `nextStep`, `previousStep`|This template is used to define the content for the steps.|
+|Footer|`footer`|`currentStep`, `next(amount)`, `previous(amount)`, `navigateToId(stepId)`, `nextStep`, `previousStep`|This template is used to dress up the bottom naviagtion of the stepper. For example, this is where you would put the "previous" and "next" buttons.|
 
-### Propeties reference
+### Component events
 
-|Prop|Type|Args|Description|
-|-|-|-|-|
-|step|object|-|This prop is passed to the header item template and contains the step that's being iterated.|
-|active|boolean|-|This prop is passed to the header item template. It is a reactive boolean that defaults to `false`, but becomes `true` if the iterated step is active.|
-|currentStep|object|-|This prop contains the current step.|
-|nextStep|object|-|This prop contains the next step or null if there is no next step.|
-|previousStep|object|-|This prop contains the previous step or null if there is no previous step.|
-|next|method|-|Can be used to progress though the stepper by navigation to the fist next step.| 
-|previous|method|-|Can be used to return to the previous step by navigation to te first previous step.|
-|navigateToId|method|stepId|Can be used to navigate the stepper to the step with the given id (`stepId`).|
+Every events receives a [context object](#context-object) as parameter.
+
+|Event|Description|
+|-|-|
+|`next`|Fires when navigating to the very next step.|
+|`forward`|Fires when navigating any steps forwards.|
+|`backward`|Fires when navigating any steps backwards.|
+|`previous`|Fires when navigating to the immediately preceding step.|
+|`change`|Fires current step has changed.|
+|`finish`|Fires only on the "last" step, wich is determined if there are no more "next" steps.|
+
+### Context object
+
+A context object is an object that will be passed to both [component events](#component-events) and [step callbacks](#step-callback-middleware).
+
+|Prop|Description|
+|-|-|
+|`currentStep`|The current step (or step you're leaving).|
+|`sourceStep`|The step you're navigating from/to.|
+|`direction`|A number representing the amount of steps and direction of the current event. For example: Moving 2 steps back equals -2, moving one step forward equals 1 and not moving at all equals 0.| 
+
 
 ### Exposed methods
 
@@ -275,25 +300,8 @@ const example3 = () => {
 </template>
 ```
 
-If you need to call these on you own component you should expose them yourself. Note that you can't call these from an 
-event since that will cause an infinite loop due to the event being triggered when trying to navigate.
+If you need to call these on you own component you should expose them yourself. Note that you can't call these from an event since that will cause an infinite loop due to the event being triggered when trying to navigate.
 
-### Component props
-
-|Prop|Type|Description|
-|-|-|-|
-|steps|object|A defentition for the steps that exist in the stepper. Each key represents a step and it's value the options/configuration for the step.|
-|header-class|string|Overwrite the parent of the header class to style the header to your needs.|
-|restricted|boolean\|string|Disable navigation to all steps from header (can still be overwritten by step itself by setting navigable explicitly true). Set to "allow-visited" to allow only visited steps to be navigable.|
-
-### Component events
-
-|Event|Params|Description|
-|-|-|-|
-|beforeChange|currentStep|Fires before navigation to any step and before any callbacks.|
-|change|currentStep|Fires when successfully navigated to step.|
-|next|currentStep|Fires when the next() method is called.|
-|previous|currentStep|Fires when the previous() method is called.|
 
 ## Contributing 🤝
 

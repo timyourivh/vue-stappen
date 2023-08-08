@@ -37,10 +37,10 @@
   ],
   "dependencies": {
     "lodash.startcase": "^4.4.0",
+    "superchain": "^2.3.5",
     "vue": "^3.2.45"
   },
   "devDependencies": {
-    "vue-router": "^4.1.6",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/lodash.startcase": "^4.4.7",
     "@types/node": "^18.11.12",
@@ -56,6 +56,7 @@
     "prettier": "^2.7.1",
     "typescript": "~4.7.4",
     "vite": "^4.0.0",
+    "vue-router": "^4.1.6",
     "vue-tsc": "^1.0.12"
   }
 }
