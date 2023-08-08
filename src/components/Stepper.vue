@@ -265,11 +265,6 @@ const navigateToIndex = async (
     handleCallback(currentStep, context, next, 'onLeave')
   )
 
-  // Guard source step.
-  chain.add((context: StepEventContext, next) =>
-    handleCallback(sourceStep, context, next, 'onEnter')
-  )
-
   // Directional callbacks from step.
   if (context.direction) {
     // Guard very next step.
@@ -304,6 +299,11 @@ const navigateToIndex = async (
       })
     }
   }
+
+  // Guard source step.
+  chain.add((context: StepEventContext, next) =>
+    handleCallback(sourceStep, context, next, 'onEnter')
+  )
 
   // Performing the move.
   chain.final((context: StepEventContext) => {
