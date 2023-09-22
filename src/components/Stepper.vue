@@ -333,7 +333,14 @@ const handleCallback = async (
 ) => {
   if (step[callbackName]) {
     step.processing = true
-    const callbackResult = await step[callbackName](context)
+
+    let callbackResult = false
+    try {
+      callbackResult = await step[callbackName](context)
+    } catch (error) {
+      callbackResult = false
+    }
+
     step.processing = false
 
     if (callbackResult !== false) {
