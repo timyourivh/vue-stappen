@@ -12,5 +12,20 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  build: {
+    lib: {
+      entry: 'src/index.ts',
+      name: 'VueStappen',
+    },
+    rollupOptions: {
+      external: ['vue'],
+      output: {
+        exports: "named",
+        globals: {
+          vue: 'Vue',
+        },
+      },
+    },
+  },
 })
