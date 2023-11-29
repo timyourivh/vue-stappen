@@ -45,6 +45,14 @@ const router = createRouter({
             group: 'examples',
           },
           component: () => import('../views/examples/guards-async.vue')
+        },
+        {
+          path: 'step-size',
+          name: 'step size',
+          meta: {
+            group: 'examples',
+          },
+          component: () => import('../views/examples/step-size.vue')
         }
       ]
     }

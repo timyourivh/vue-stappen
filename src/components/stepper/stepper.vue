@@ -33,7 +33,8 @@ interface Props extends StepperGuards {
   modelValue?: object
   allowDirectNavigation?: boolean
   headerClass?: string | object | Array<any>
-  processing?: boolean
+  processing?: boolean,
+  maxStepSize?: number | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -41,6 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
   allowDirectNavigation: true,
   headerClass: '',
   processing: false,
+  maxStepSize: null
 })
 
 const emit = defineEmits([
@@ -168,7 +170,7 @@ const toStep = async (targetStep: RendererNode | undefined, direction: number|nu
   }
 
   // Void action if step doesn't exist
-  if (!targetStep) {
+  if (!targetStep || (props.maxStepSize !== null && props.maxStepSize < Math.abs(params.direction) )) {
     return
   }
 
@@ -190,8 +192,8 @@ const toStep = async (targetStep: RendererNode | undefined, direction: number|nu
     scrollIntoView(headerElement, {
       block: 'nearest',
       inline: params.direction ? (params.direction < 0 ? 'start' : 'end') : 'center',
-      behavior: 'smooth', // or 'auto' for instant scrolling
-      scrollMode: 'if-needed', // or 'always'
+      behavior: 'smooth',
+      scrollMode: 'if-needed',
       boundary: headerContainer
     })
   }
