@@ -8,6 +8,14 @@ defineProps({
     type: [String, Number],
     required: true
   },
+  processing: {
+    type: Boolean,
+    default: false
+  },
+  onMove: {
+    type: Function,
+    default: () => true
+  },
   onAdvance: {
     type: Function,
     default: () => true
@@ -21,9 +29,7 @@ defineProps({
 
 <template>
   <div>
-    <slot name="header">
-      Header
-    </slot>
+    <slot name="header" />
     <slot />
   </div>
 </template>

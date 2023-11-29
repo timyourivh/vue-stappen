@@ -37,6 +37,14 @@ const router = createRouter({
             group: 'examples',
           },
           component: () => import('../views/examples/guards.vue')
+        },
+        {
+          path: 'async-guards',
+          name: 'async guards',
+          meta: {
+            group: 'examples',
+          },
+          component: () => import('../views/examples/guards-async.vue')
         }
       ]
     }

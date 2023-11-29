@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import Stepper from '../../components/custom-stepper.vue'
+import { reactive } from 'vue'
 import Checkbox from '../../components/checkbox.vue'
 import Step from '@/components/stepper/step.vue'
-import { reactive } from 'vue'
+import Stepper from '../../components/custom-stepper.vue'
 
 const flags = reactive({
+  allowMovement: true,
   allowAdvance: true,
   allowReverse: true,
   allowAdvanceStep2: true,
 })
 
+const moveGuard = () => {
+  console.log('moveGuard: ' + flags.allowMovement);
+  return flags.allowMovement
+}
 const advanceGuard = () => {
   console.log('advanceGuard: ' + flags.allowAdvance);
   return flags.allowAdvance
@@ -29,6 +34,7 @@ const step2Guard = () => {
     <div class="flex justify-center w-full">
       <Stepper
         class="w-2/3"
+        :on-move="moveGuard"
         :on-advance="advanceGuard"
         :on-reverse="reverseGuard"
       >
@@ -50,6 +56,7 @@ const step2Guard = () => {
     <hr class="my-4">
 
     <div>
+      <Checkbox v-model="flags.allowMovement" label="Allow movement" name="allowMovement" />
       <Checkbox v-model="flags.allowAdvance" label="Allow advance" name="allowAdvance" />
       <Checkbox v-model="flags.allowReverse" label="Allow reverse" name="allowReverse" />
       <Checkbox v-model="flags.allowAdvanceStep2" label="Allow advance on step 2" name="allowAdvanceStep2" />

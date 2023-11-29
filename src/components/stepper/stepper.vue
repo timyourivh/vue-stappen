@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useSlots, type RendererNode } from 'vue'
+import { computed, ref, useSlots, type RendererNode, watch } from 'vue'
 import camelCase from 'lodash.camelcase'
 import { useRefHistory } from '@vueuse/core'
 import Step from './step.vue'
@@ -9,19 +9,38 @@ defineOptions({
   name: 'VueStappen'
 })
 
-interface Middlewares {
+interface StepperGuards {
+  onMove?: () => boolean
   onAdvance?: () => boolean
   onReverse?: () => boolean
-  // Add any other keys as needed
 }
 
-interface Props extends Middlewares {
+interface StepGuards {
+  onMove?: () => boolean
+  onAdvance?: () => boolean
+  onReverse?: () => boolean
+}
+
+type Guards = StepperGuards & StepGuards
+
+interface Props extends StepperGuards {
   modelValue?: object
+  allowDirectNavigation?: boolean
+  headerClass?: string | object | Array<any>
+  processing?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: undefined,
+  allowDirectNavigation: true,
+  headerClass: '',
+  processing: false,
+})
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits([
+  'update:modelValue',
+  'update:processing',
+])
 
 const slots = useSlots()
 
@@ -59,12 +78,17 @@ const steps = computed(() => {
     step.props = Object.fromEntries(
       Object.entries({
         name: `step ${key + 1}`,
-        visible: true,
         ...step.props
       }).map(([k, v]) => [camelCase(k), v])
     )
     return step
   })
+})
+
+const _processing = ref(false)
+
+watch(_processing, (value) => {  
+  emit('update:processing', value)
 })
 
 const currentId = ref<string>(steps.value[0].props.id)
@@ -82,25 +106,49 @@ const currentStep = computed<RendererNode>(() => {
   return _currentStep
 })
 
-const checkGlobalGuard = async (name: keyof Middlewares) => {
+const checkGuard = async (name: keyof Guards) => {
   let continues = true
 
+  _processing.value = true
+
+  // If guard exists on stepper, check it
   if (props[name] && typeof props[name] === 'function') {
-    const result = await props[name]?.()
+    try {
+      const result = await props[name]?.()
 
-    continues = result === undefined || !!result
+      continues = result === undefined || !!result
+    } catch (error) {
+      console.error(`Error in stepper guard "${name}": ` + error)
+    }
   }
 
+  // If guard exists on step itself, check it
   if (currentStep.value.props[name] && typeof currentStep.value.props[name] === 'function') {
-    const result = await currentStep.value.props[name]?.()
+    try {
+      const result = await currentStep.value.props[name]?.()
 
-    continues = result === undefined || !!result
+      continues = result === undefined || !!result
+    } catch (error) {
+      console.error(`Error in step "${currentStep.value.props.id}" guard "${name}": ` + error)
+    }
   }
+
+  _processing.value = false
 
   return continues
 }
 
 const toStep = async (targetStep: RendererNode | undefined) => {
+  // Void action if stepper is still processing 
+  if (_processing.value === true) {
+    return
+  }
+
+  if (!(await checkGuard('onMove'))) {
+    return;
+  }
+
+  // Void action if step doesn't exist
   if (!targetStep) {
     return
   }
@@ -109,8 +157,8 @@ const toStep = async (targetStep: RendererNode | undefined) => {
 
   // Stepper middleware
   if (
-    (directon >= 1 && !(await checkGlobalGuard('onAdvance'))) ||
-    (directon <= -1 && !(await checkGlobalGuard('onReverse')))
+    (directon >= 1 && !(await checkGuard('onAdvance'))) ||
+    (directon <= -1 && !(await checkGuard('onReverse')))
   ) {
     return
   }
@@ -138,6 +186,19 @@ const next = () => {
 const previous = () => {
   toStep(steps.value[steps.value.indexOf(currentStep.value) - 1])
 }
+const navigateTo = (stepId: string) => {
+  if (!props.allowDirectNavigation) {
+    return;
+  }
+
+  const step = steps.value.find(({ props }) => props.id === stepId)
+
+  if (!step) {
+    throw new Error(`Error trying to navigate to step "${stepId}": A step with this id does not exist.`)
+  }
+
+  toStep(step)
+}
 
 const navigation = {
   next,
@@ -147,45 +208,39 @@ const navigation = {
 
 <template>
   <div>
-    <div id="header-containter" style="display: flex; overflow: auto">
-      <div v-for="(step, index) in steps" :id="`header-${step.props.id}`" :key="index">
-        <component
-          :is="step.children.header"
-          v-if="step.children.header"
-          :step="step.props"
-          :current="step.props.id === currentId"
-          :visited="!!idHistorty.history.value.find(({ snapshot }) => snapshot === step.props.id)"
-          :number="steps.indexOf(step) + 1"
-          :callback="() => toStep(step)"
-        />
-        <div v-else>
-          <slot
-            name="header"
-            :current="step.props.id === currentId"
-            :visited="!!idHistorty.history.value.find(({ snapshot }) => snapshot === step.props.id)"
-            :step="step.props"
-            :number="steps.indexOf(step) + 1"
-            :callback="() => toStep(step)"
-          >
+    <ol id="header-containter" style="display: flex; overflow: auto" :class="headerClass">
+      <li v-for="(step, index) in steps" :id="`header-${step.props.id}`" :key="index">
+        <slot
+          name="header"
+          v-bind="{
+            current: step.props.id === currentId,
+            processing: step.props.id === currentId && _processing,
+            visited: !!idHistorty.history.value.find(({ snapshot }) => snapshot === step.props.id),
+            step: step.props,
+            number: steps.indexOf(step) + 1,
+            callback: () => navigateTo(step.props.id)
+          }"
+        >
+          <div @click="toStep(step.props.id)">
             {{ step.props.name }}
-          </slot>
-        </div>
-      </div>
-    </div>
+          </div>
+        </slot>
+      </li>
+    </ol>
 
     <!-- Stepper content -->
     <div>
       <component :is="currentStep.children.default" />
     </div>
 
-    <slot name="navigation" :methods="navigation">
-      <slot name="previous" :methods="navigation">
-        <button @click="previous">
+    <slot name="navigation" :methods="navigation" :processing="processing">
+      <slot name="previous" :methods="navigation" :processing="processing">
+        <button :disabled="processing" @click="previous">
           Previous
         </button>
       </slot>
-      <slot name="next" :methods="navigation">
-        <button @click="next">
+      <slot name="next" :methods="navigation" :processing="processing">
+        <button :disabled="processing" @click="next">
           Next
         </button>
       </slot>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Stepper from '@/components/stepper/stepper.vue';
-import { CheckIcon, PencilIcon } from '@heroicons/vue/20/solid';
+import { CheckIcon, PencilIcon, ClockIcon } from '@heroicons/vue/20/solid';
 </script>
 
 <template>
@@ -10,7 +10,7 @@ import { CheckIcon, PencilIcon } from '@heroicons/vue/20/solid';
   >
     <slot />
 
-    <template #header="{ step, current, visited, number, callback }">
+    <template #header="{ step, current, visited, number, callback, processing }">
       <div class="flex space-x-4 items-center p-4 cursor-pointer" style="min-width: 12rem;" @click="callback">
         <div
           class="rounded-full h-6 w-6 flex items-center justify-center"
@@ -20,7 +20,8 @@ import { CheckIcon, PencilIcon } from '@heroicons/vue/20/solid';
             'bg-gray-600': !current
           }"
         >
-          <PencilIcon v-if="current" class="text-white h-4" />
+          <ClockIcon v-if="processing" class="text-white h-4" />
+          <PencilIcon v-else-if="current" class="text-white h-4" />
           <CheckIcon v-else-if="!current && visited" class="text-white h-5" />
           <span v-else class="text-white text-sm font-bold">{{ number }}</span>
         </div>
@@ -31,10 +32,11 @@ import { CheckIcon, PencilIcon } from '@heroicons/vue/20/solid';
       </div>
     </template>
 
-    <template #navigation="{ methods }">
+    <template #navigation="{ methods, processing }">
       <div class="flex justify-between">
         <button
           class="button mt-4"
+          :disabled="processing"
           @click="methods.previous"
         >
           Previous
@@ -42,6 +44,7 @@ import { CheckIcon, PencilIcon } from '@heroicons/vue/20/solid';
       
         <button
           class="button mt-4 ml-2"
+          :disabled="processing"
           @click="methods.next"
         >
           Next

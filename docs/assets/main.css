@@ -3,7 +3,10 @@
 @tailwind utilities;
 
 .button {
-    @apply rounded-md bg-indigo-500 px-3 py-1 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600;
+    @apply text-white bg-indigo-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2 focus:outline-none;
+}
+.button:disabled {
+    @apply text-white bg-gray-500 focus:ring-4 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2 focus:outline-none;
 }
 
 .button.danger {
