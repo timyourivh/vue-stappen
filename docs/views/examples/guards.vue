@@ -55,11 +55,13 @@ const step2Guard = () => {
 
     <hr class="my-4">
 
-    <div>
-      <Checkbox v-model="flags.allowMovement" label="Allow movement" name="allowMovement" />
-      <Checkbox v-model="flags.allowAdvance" label="Allow advance" name="allowAdvance" />
-      <Checkbox v-model="flags.allowReverse" label="Allow reverse" name="allowReverse" />
-      <Checkbox v-model="flags.allowAdvanceStep2" label="Allow advance on step 2" name="allowAdvanceStep2" />
+    <div class="flex justify-center w-full">
+      <div>
+        <Checkbox v-model="flags.allowMovement" label="Allow movement" name="allowMovement" />
+        <Checkbox v-model="flags.allowAdvance" label="Allow advance" name="allowAdvance" />
+        <Checkbox v-model="flags.allowReverse" label="Allow reverse" name="allowReverse" />
+        <Checkbox v-model="flags.allowAdvanceStep2" label="Allow advance on step 2" name="allowAdvanceStep2" />
+      </div>
     </div>
   </div>
 </template>

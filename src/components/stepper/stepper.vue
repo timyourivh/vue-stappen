@@ -2,23 +2,29 @@
 import { computed, ref, useSlots, type RendererNode, watch } from 'vue'
 import camelCase from 'lodash.camelcase'
 import { useRefHistory } from '@vueuse/core'
-import Step from './step.vue'
+import StepComponent from './step.vue'
 import scrollIntoView from 'scroll-into-view-if-needed'
 
 defineOptions({
   name: 'VueStappen'
 })
 
+export interface GuardParams<T={}> {
+  direction: number
+  step: T
+  target: T | null
+}
+
 interface StepperGuards {
-  onMove?: () => boolean
-  onAdvance?: () => boolean
-  onReverse?: () => boolean
+  onMove?: (params: GuardParams) => boolean
+  onAdvance?: (params: GuardParams) => boolean
+  onReverse?: (params: GuardParams) => boolean
 }
 
 interface StepGuards {
-  onMove?: () => boolean
-  onAdvance?: () => boolean
-  onReverse?: () => boolean
+  onMove?: (params: GuardParams) => boolean
+  onAdvance?: (params: GuardParams) => boolean
+  onReverse?: (params: GuardParams) => boolean
 }
 
 type Guards = StepperGuards & StepGuards
@@ -52,7 +58,7 @@ const steps = computed(() => {
 
   const searchRecursive = (items: RendererNode[]) => {
     for (const item of items) {
-      if (item.type === Step) {
+      if (item.type === StepComponent) {
         _steps.push(item)
       }
 
@@ -106,7 +112,7 @@ const currentStep = computed<RendererNode>(() => {
   return _currentStep
 })
 
-const checkGuard = async (name: keyof Guards) => {
+const checkGuard = async (name: keyof Guards, params: GuardParams) => {
   let continues = true
 
   _processing.value = true
@@ -114,7 +120,7 @@ const checkGuard = async (name: keyof Guards) => {
   // If guard exists on stepper, check it
   if (props[name] && typeof props[name] === 'function') {
     try {
-      const result = await props[name]?.()
+      const result = await props[name]?.(params)
 
       continues = result === undefined || !!result
     } catch (error) {
@@ -138,13 +144,26 @@ const checkGuard = async (name: keyof Guards) => {
   return continues
 }
 
-const toStep = async (targetStep: RendererNode | undefined) => {
+function calculateTargetDirection(
+  currentStep: RendererNode,
+  targetStep?: RendererNode
+): number {
+  return targetStep ? steps.value.indexOf(targetStep) - steps.value.indexOf(currentStep) : 0;
+}
+
+const toStep = async (targetStep: RendererNode | undefined, direction: number|null = null) => {
   // Void action if stepper is still processing 
   if (_processing.value === true) {
     return
   }
 
-  if (!(await checkGuard('onMove'))) {
+  const params: GuardParams = {
+    direction: direction || calculateTargetDirection(currentStep.value, targetStep),
+    step: currentStep.value.props,
+    target: targetStep?.props ?? null
+  }
+
+  if (!(await checkGuard('onMove', params))) {
     return;
   }
 
@@ -153,12 +172,10 @@ const toStep = async (targetStep: RendererNode | undefined) => {
     return
   }
 
-  const directon = steps.value.indexOf(targetStep) - steps.value.indexOf(currentStep.value)
-
-  // Stepper middleware
+  // Directional middleware
   if (
-    (directon >= 1 && !(await checkGuard('onAdvance'))) ||
-    (directon <= -1 && !(await checkGuard('onReverse')))
+    (params.direction && params.direction >= 1 && !(await checkGuard('onAdvance', params))) ||
+    (params.direction && params.direction <= -1 && !(await checkGuard('onReverse', params)))
   ) {
     return
   }
@@ -172,7 +189,7 @@ const toStep = async (targetStep: RendererNode | undefined) => {
   if (headerElement && headerContainer) {
     scrollIntoView(headerElement, {
       block: 'nearest',
-      inline: directon < 0 ? 'start' : 'end',
+      inline: params.direction ? (params.direction < 0 ? 'start' : 'end') : 'center',
       behavior: 'smooth', // or 'auto' for instant scrolling
       scrollMode: 'if-needed', // or 'always'
       boundary: headerContainer
@@ -181,10 +198,10 @@ const toStep = async (targetStep: RendererNode | undefined) => {
 }
 
 const next = () => {
-  toStep(steps.value[steps.value.indexOf(currentStep.value) + 1])
+  toStep(steps.value[steps.value.indexOf(currentStep.value) + 1], 1)
 }
 const previous = () => {
-  toStep(steps.value[steps.value.indexOf(currentStep.value) - 1])
+  toStep(steps.value[steps.value.indexOf(currentStep.value) - 1], -1)
 }
 const navigateTo = (stepId: string) => {
   if (!props.allowDirectNavigation) {
@@ -202,7 +219,7 @@ const navigateTo = (stepId: string) => {
 
 const navigation = {
   next,
-  previous
+  previous,
 }
 </script>
 

@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import Checkbox from '../../components/checkbox.vue'
 import Step from '@/components/stepper/step.vue'
 import Stepper from '../../components/custom-stepper.vue'
+import type { GuardParams } from '@/components/stepper/stepper.vue';
 
 const form = reactive({
   time: 1
@@ -11,7 +12,11 @@ const form = reactive({
 const allowMove = ref(true)
 const processing = ref(false)
 
-const onMove = () => {
+const onMove = ({ direction, target }: GuardParams<{name: string, id: string|number}>) => {  
+  if (direction < 0 && !target) {
+    return false
+  }
+  
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(allowMove.value)
