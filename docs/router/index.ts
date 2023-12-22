@@ -53,6 +53,14 @@ const router = createRouter({
             group: 'examples',
           },
           component: () => import('../views/examples/step-size.vue')
+        },
+        {
+          path: 'undo-on-previous',
+          name: 'undo on previous',
+          meta: {
+            group: 'examples',
+          },
+          component: () => import('../views/examples/undo-on-previous.vue')
         }
       ]
     }

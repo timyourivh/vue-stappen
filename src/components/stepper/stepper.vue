@@ -35,6 +35,7 @@ interface Props extends StepperGuards {
   headerClass?: string | object | Array<any>
   processing?: boolean,
   maxStepSize?: number
+  undoOnPrevious?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -43,6 +44,7 @@ const props = withDefaults(defineProps<Props>(), {
   headerClass: '',
   processing: false,
   maxStepSize: undefined,
+  undoOnPrevious: false
 })
 
 const emit = defineEmits([
@@ -203,6 +205,11 @@ const next = () => {
   toStep(steps.value[steps.value.indexOf(currentStep.value) + 1], 1)
 }
 const previous = () => {
+  if (props.undoOnPrevious === true) {
+    idHistorty.undo()
+    return
+  }
+
   toStep(steps.value[steps.value.indexOf(currentStep.value) - 1], -1)
 }
 const navigateTo = (stepId: string) => {
