@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Stepper from '@/components/stepper/stepper.vue';
-import { CheckIcon, PencilIcon, ClockIcon } from '@heroicons/vue/20/solid';
+import { CheckIcon, PencilIcon } from '@heroicons/vue/20/solid';
 </script>
 
 <template>
@@ -10,13 +10,14 @@ import { CheckIcon, PencilIcon, ClockIcon } from '@heroicons/vue/20/solid';
   >
     <slot />
 
-    <template #header="{ step, current, visited, number, callback, processing, available }">
+    <template #header="{ step, current, visited, number, callback, processing, available, distanceFromCurrent }">
       <div
         class="flex space-x-4 items-center p-4"
         :class="{
           'cursor-pointer': available
         }"
         style="min-width: 12rem;"
+        :title="`Distance from current step: ${distanceFromCurrent}`"
         @click="callback"
       >
         <div
