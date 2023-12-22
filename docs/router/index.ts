@@ -23,6 +23,14 @@ const router = createRouter({
           component: () => import('../views/examples/basic.vue')
         },
         {
+          path: 'toggle-steps',
+          name: 'toggle steps',
+          meta: {
+            group: 'examples',
+          },
+          component: () => import('../views/examples/toggle-steps.vue')
+        },
+        {
           path: 'extra-steps',
           name: 'extra steps',
           meta: {
