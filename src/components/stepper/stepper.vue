@@ -33,9 +33,10 @@ interface Props extends StepperGuards {
   modelValue?: object
   allowDirectNavigation?: boolean
   headerClass?: string | object | Array<any>
-  processing?: boolean,
+  processing?: boolean
   maxStepSize?: number
   undoOnPrevious?: boolean
+  progressive?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -44,7 +45,8 @@ const props = withDefaults(defineProps<Props>(), {
   headerClass: '',
   processing: false,
   maxStepSize: undefined,
-  undoOnPrevious: false
+  undoOnPrevious: false,
+  progressive: false
 })
 
 const emit = defineEmits([
@@ -244,11 +246,12 @@ const isInrange = (step: RendererNode) => props.maxStepSize || props.maxStepSize
           v-bind="{
             current: step.props.id === currentId,
             processing: step.props.id === currentId && _processing,
-            visited: isVisited(step),
+            visited: progressive ? (calculateTargetDirection(currentStep, step) < 0) : isVisited(step),
             step: step.props,
             number: steps.indexOf(step) + 1,
             callback: () => navigateTo(step.props.id),
-            available: isInrange(step) && !processing
+            available: isInrange(step) && !processing,
+            distanceFromCurrent: calculateTargetDirection(currentStep, step),
           }"
         >
           <div @click="toStep(step.props.id)">
