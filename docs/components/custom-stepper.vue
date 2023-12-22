@@ -10,8 +10,15 @@ import { CheckIcon, PencilIcon, ClockIcon } from '@heroicons/vue/20/solid';
   >
     <slot />
 
-    <template #header="{ step, current, visited, number, callback, processing }">
-      <div class="flex space-x-4 items-center p-4 cursor-pointer" style="min-width: 12rem;" @click="callback">
+    <template #header="{ step, current, visited, number, callback, processing, available }">
+      <div
+        class="flex space-x-4 items-center p-4"
+        :class="{
+          'cursor-pointer': available
+        }"
+        style="min-width: 12rem;"
+        @click="callback"
+      >
         <div
           class="rounded-full h-6 w-6 flex items-center justify-center"
           :class="{

@@ -34,7 +34,7 @@ interface Props extends StepperGuards {
   allowDirectNavigation?: boolean
   headerClass?: string | object | Array<any>
   processing?: boolean,
-  maxStepSize?: number | null
+  maxStepSize?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
   allowDirectNavigation: true,
   headerClass: '',
   processing: false,
-  maxStepSize: null
+  maxStepSize: undefined,
 })
 
 const emit = defineEmits([
@@ -53,10 +53,10 @@ const emit = defineEmits([
 const slots = useSlots()
 
 const steps = computed(() => {
-  const _steps: RendererNode[] = []
-
   const depth = 3
   let currentLevel = 0
+
+  const _steps: RendererNode[] = []
 
   const searchRecursive = (items: RendererNode[]) => {
     for (const item of items) {
@@ -85,7 +85,7 @@ const steps = computed(() => {
   return _steps.map((step, key) => {
     step.props = Object.fromEntries(
       Object.entries({
-        name: `step ${key + 1}`,
+        name: `Step ${key + 1}`,
         ...step.props
       }).map(([k, v]) => [camelCase(k), v])
     )
@@ -170,7 +170,7 @@ const toStep = async (targetStep: RendererNode | undefined, direction: number|nu
   }
 
   // Void action if step doesn't exist
-  if (!targetStep || (props.maxStepSize !== null && props.maxStepSize < Math.abs(params.direction) )) {
+  if (!targetStep || (props.maxStepSize !== undefined && Math.abs(props.maxStepSize) < Math.abs(params.direction) )) {
     return
   }
 
@@ -223,6 +223,9 @@ const navigation = {
   next,
   previous,
 }
+
+const isVisited = (step: RendererNode) => !!idHistorty.history.value.find(({ snapshot }) => snapshot === step.props.id)
+const isInrange = (step: RendererNode) => props.maxStepSize || props.maxStepSize === 0 ? Math.abs(calculateTargetDirection(currentStep.value, step)) <= Math.abs(props.maxStepSize) : true
 </script>
 
 <template>
@@ -234,10 +237,11 @@ const navigation = {
           v-bind="{
             current: step.props.id === currentId,
             processing: step.props.id === currentId && _processing,
-            visited: !!idHistorty.history.value.find(({ snapshot }) => snapshot === step.props.id),
+            visited: isVisited(step),
             step: step.props,
             number: steps.indexOf(step) + 1,
-            callback: () => navigateTo(step.props.id)
+            callback: () => navigateTo(step.props.id),
+            available: isInrange(step) && !processing
           }"
         >
           <div @click="toStep(step.props.id)">
