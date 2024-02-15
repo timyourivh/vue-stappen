@@ -26,6 +26,10 @@ const router = createRouter({
         {
           path: 'unstyled',
           component: () => import('../views/playground/UnstyledView.vue')
+        },
+        {
+          path: 'basic',
+          component: () => import('../views/playground/BasicView.vue')
         }
       ]
     }

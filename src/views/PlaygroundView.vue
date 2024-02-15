@@ -20,7 +20,7 @@ import { RouterView } from 'vue-router';
         </div>
       </div>
       <div class="navbar-center">
-        <RouterLink to="/" class="btn btn-ghost text-xl">daisyUI</RouterLink>
+        <RouterLink to="/" class="btn btn-ghost text-xl">Vue Stappen</RouterLink>
       </div>
       <div class="navbar-end">
         <!-- // -->

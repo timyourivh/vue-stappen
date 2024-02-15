@@ -19,6 +19,9 @@
       <li>
         <RouterLink to="/playground/unstyled" class="link">Unstyled</RouterLink>
       </li>
+      <li>
+        <RouterLink to="/playground/basic" class="link">Basic</RouterLink>
+      </li>
     </ul>
   </div>
 </template>
