@@ -28,7 +28,7 @@ import { RouterView } from 'vue-router';
     </div>
 
     <div class="h-full my-6 container mx-auto">
-      <div class="card bg-base-200 shadow-xl p-6">
+      <div class="flex flex-col gap-6">
         <RouterView />
       </div>
     </div>
