@@ -2,10 +2,29 @@
 import { computed, ref, useSlots, type RendererNode, onMounted, nextTick, watch } from 'vue';
 import VueStap from './VueStap.vue';
 
-defineProps<{
+export type Guard = () => boolean|Promise<boolean>
+
+interface Guards {
+  onMove?: Guard
+}
+
+// Definitions
+const props = defineProps<{
   headerClass?: string
   stepClass?: string
-}>()
+} & Guards>()
+
+// Models
+const history = defineModel<string[]>('history', { default: [] })
+const modelValue = defineModel<string>({ default: null })
+const processing = defineModel<boolean>('processing', { default: false })
+
+watch(modelValue, (value) => {
+  const targetIndex = getIndexById(value)
+  if (targetIndex !== currentStepIndex.value) {
+    moveToIndex(targetIndex)
+  }  
+})
 
 const getSteps = (list: RendererNode[], result: RendererNode[] = []) => {
   list.forEach(element => {    
@@ -48,34 +67,28 @@ const currentStepComponent = computed(() => {
   return stepComponents.value[currentStepIndex.value]
 })
 
-const history = defineModel<string[]>('history', { default: [] })
-const modelValue = defineModel<string>({ default: null })
+const checkGuard = async (guardKey: keyof Guards): Promise<boolean> => {
+  const guard = props[guardKey] as Guard|undefined
 
-watch(modelValue, (value) => {
-  const targetIndex = getIndexById(value)
-  if (targetIndex !== currentStepIndex.value) {
-    moveToIndex(targetIndex)
-  }  
-})
-
-onMounted(() => {
-  if (modelValue.value !== null) {
-    currentStepIndex.value = getIndexById(modelValue.value)
+  if (guard === undefined) {
+    return true
   }
-  
-  modelValue.value = currentStepComponent.value.props.id
 
-  nextTick(() => {
-    if (!history.value.includes(modelValue.value)) {    
-      history.value.push(modelValue.value)
-    }
-  })
-})
+  processing.value = true
+  const result = await guard()
+  processing.value = false
 
-const moveToIndex = (index: number) => {
+  return result
+}
+
+const moveToIndex = async (index: number) => {
   // Void if step doesn't exist
   if (!stepComponents.value[index]) {
-    return false
+    return
+  }
+
+  if (!await checkGuard('onMove')) {
+    return
   }
 
   // The actual move
@@ -84,7 +97,7 @@ const moveToIndex = (index: number) => {
   // Add current step to hitory
   history.value.push(modelValue.value = currentStepComponent.value.props.id)
 
-  return true
+  return
 }
 
 const next = () => {
@@ -106,6 +119,21 @@ const headerProps = (stepComponent: RendererNode, index: number) => {
     number: index + 1,
   }
 }
+
+onMounted(() => {
+  processing.value = false
+  if (modelValue.value !== null) {
+    currentStepIndex.value = getIndexById(modelValue.value)
+  }
+  
+  modelValue.value = currentStepComponent.value.props.id
+
+  nextTick(() => {
+    if (!history.value.includes(modelValue.value)) {    
+      history.value.push(modelValue.value)
+    }
+  })
+})
 </script>
 
 <template>

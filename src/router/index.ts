@@ -30,6 +30,10 @@ const router = createRouter({
         {
           path: 'basic',
           component: () => import('../views/playground/BasicView.vue')
+        },
+        {
+          path: 'stepper-guard',
+          component: () => import('../views/playground/StepperGuardView.vue')
         }
       ]
     }

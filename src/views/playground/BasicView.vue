@@ -48,6 +48,12 @@ const clearHistory = () => {
           Body step 3
         </template>
       </Step>
+
+      <Step id="step4">
+        <template #default>
+          Body step 4
+        </template>
+      </Step>
     </component>
   </div>
 
