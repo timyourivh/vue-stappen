@@ -3,14 +3,12 @@ import { Stepper } from './export'
 </script>
 
 <template>
-  <Stepper header-class="steps" step-class="border p-3 rounded-lg my-4 border-gray-200 dark:border-gray-700 ">
-    <template #header-item="{ index, currentIndex, visited, step, active }">
+  <Stepper header-class="steps" step-class="border p-3 rounded-lg my-4 border-gray-200 dark:border-gray-700" v-bind="$props">
+    <template #header-item="{ index, currentIndex, step, active }">
       <li
         class="step" 
         :class="{
-          // 'step-primary': index <= currentIndex
-
-          'step-primary': visited,
+          'step-primary': index <= currentIndex,
           'step-accent font-bold text-black dark:text-white': active
         }">
         {{ step.id }}

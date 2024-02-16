@@ -1,25 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, useSlots, type RendererNode } from 'vue';
+import { computed, ref, useSlots, type RendererNode, onMounted, nextTick, watch } from 'vue';
 import VueStap from './VueStap.vue';
 
-const props = defineProps<{
-  step?: string
+defineProps<{
   headerClass?: string
   stepClass?: string
 }>()
-
-const emit = defineEmits([
-  'update:step'
-])
-
-const step = computed({
-  get () {
-    return props.step
-  },
-  set (value) {
-    emit('update:step', value)
-  }
-})
 
 const getSteps = (list: RendererNode[], result: RendererNode[] = []) => {
   list.forEach(element => {    
@@ -46,25 +32,59 @@ const stepComponents = computed(() => {
   return getSteps(defaultSlot())
 })
 
+const getIndexById = (id: string) => {
+  const step = stepComponents.value.find(({ props }) => {    
+    return props.id === id
+  })
+
+  if (step) {
+    return stepComponents.value.indexOf(step)
+  }
+  
+  return -1
+}
+
 const currentStepComponent = computed(() => { 
   return stepComponents.value[currentStepIndex.value]
 })
 
-const history = ref<string[]>([
-  stepComponents.value[0].props.id
-])
+const history = defineModel<string[]>('history', { default: [] })
+const modelValue = defineModel<string>({ default: null })
+
+watch(modelValue, (value) => {
+  const targetIndex = getIndexById(value)
+  if (targetIndex !== currentStepIndex.value) {
+    moveToIndex(targetIndex)
+  }  
+})
+
+onMounted(() => {
+  if (modelValue.value !== null) {
+    currentStepIndex.value = getIndexById(modelValue.value)
+  }
+  
+  modelValue.value = currentStepComponent.value.props.id
+
+  nextTick(() => {
+    if (!history.value.includes(modelValue.value)) {    
+      history.value.push(modelValue.value)
+    }
+  })
+})
 
 const moveToIndex = (index: number) => {
   // Void if step doesn't exist
   if (!stepComponents.value[index]) {
-    return
+    return false
   }
 
   // The actual move
   currentStepIndex.value = index
 
   // Add current step to hitory
-  history.value.push(currentStepComponent.value.props.id)
+  history.value.push(modelValue.value = currentStepComponent.value.props.id)
+
+  return true
 }
 
 const next = () => {
