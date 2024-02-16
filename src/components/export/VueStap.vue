@@ -6,11 +6,14 @@ defineOptions({
 defineProps<{
   id: string|number
 }>()
-</script>
 
-<template>
-  <div>
-    Step
-    <slot></slot>
-  </div>
-</template>
+const processing = defineModel<boolean>('processing', { default: false })
+
+const setProcessing = (value: boolean): void => {
+  processing.value = value
+}
+
+defineExpose([
+  'setProcessing'
+])
+</script>

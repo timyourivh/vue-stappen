@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useSlots, type RendererNode, onMounted, nextTick, watch } from 'vue';
 import VueStap from './VueStap.vue';
+import kebabCase from 'lodash.kebabcase';
 
 export type Guard = () => boolean|Promise<boolean>
 
@@ -40,10 +41,9 @@ const getSteps = (list: RendererNode[], result: RendererNode[] = []) => {
 }
 
 const currentStepIndex = ref(0)
+const defaultSlot = useSlots().default
 
 const stepComponents = computed(() => {
-  const defaultSlot = useSlots().default
-
   if (typeof defaultSlot !== 'function') {
     throw new Error('Unable to render stepper without steps.')
   }
@@ -67,8 +67,15 @@ const currentStepComponent = computed(() => {
   return stepComponents.value[currentStepIndex.value]
 })
 
-const checkGuard = async (guardKey: keyof Guards): Promise<boolean> => {
-  const guard = props[guardKey] as Guard|undefined
+const getGuard = (object: Record<string, any>, key: string): Guard|undefined => {  
+  if (object[key]) {
+    return object[key]
+  }
+  return object[kebabCase(key)]
+}
+
+const checkStepperGuard = async (guardKey: keyof Guards): Promise<boolean> => {
+  const guard = getGuard(props, guardKey)
 
   if (guard === undefined) {
     return true
@@ -81,13 +88,37 @@ const checkGuard = async (guardKey: keyof Guards): Promise<boolean> => {
   return result
 }
 
+const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards): Promise<boolean> => {  
+  const guard = getGuard(step.props, guardKey)  
+
+  if (guard === undefined) {
+    return true
+  }
+  
+  // Call component events from here
+  step.props['onUpdate:processing'](true)
+  const result = await guard()
+  step.props['onUpdate:processing'](false)
+
+  return result
+}
+
 const moveToIndex = async (index: number) => {
-  // Void if step doesn't exist
-  if (!stepComponents.value[index]) {
+  // Void if stepper or step is still processing  
+  if (currentStepComponent.value.props.processing || processing.value) {
     return
   }
 
-  if (!await checkGuard('onMove')) {
+  if (!await checkStepperGuard('onMove')) {
+    return
+  }
+
+  if (!await checkStepGuard(currentStepComponent.value, 'onMove')) {
+    return
+  }
+  
+  // Void if next step doesn't exist
+  if (!stepComponents.value[index]) {
     return
   }
 
