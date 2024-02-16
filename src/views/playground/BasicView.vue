@@ -66,8 +66,9 @@ const clearHistory = () => {
             <input v-model="progressive" type="checkbox" class="checkbox checkbox-primary" />
           </label>
         </div>
-        <div class="form-control mb-2">
-          <button class="btn btn-neutral" @click="clearHistory">Clear history</button>
+        <div class="flex mb-2 gap-2">
+          <button class="btn btn-neutral flex-1 " @click="clearHistory">Clear history</button>
+          <button class="btn btn-neutral flex-1 " @click="history.push('step3')">Add step 3 to history</button>
         </div>
         <div class="form-control mb-2">
           <button class="btn btn-neutral" @click="step = 'step2'">Set to step 2</button>
