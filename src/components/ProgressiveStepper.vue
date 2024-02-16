@@ -17,11 +17,13 @@ import { Stepper } from './export'
 
     <slot />
 
-    <template #navigation="{ next, previous }">
+    <template #navigation="{ next, previous, previousStep, nextStep }">
       <div class="flex">
-        <button class="btn btn-neutral" @click="previous">Previous</button>
+        <button v-if="previousStep" class="btn btn-neutral" @click="previous">Previous</button>
         <div class="w-full"></div>
-        <button class="btn btn-neutral" @click="next">Next</button>
+        <button class="btn" :class="{ 'btn-neutral': nextStep, 'btn-primary': !nextStep }" @click="next">
+          {{ nextStep ? 'Next' : 'Finish' }}
+        </button>
       </div>
     </template>
   </Stepper>

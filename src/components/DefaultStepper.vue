@@ -4,24 +4,29 @@ import { Stepper } from './export'
 
 <template>
   <Stepper header-class="steps" step-class="border p-3 rounded-lg my-4 border-gray-200 dark:border-gray-700" v-bind="$props">
-    <template #header-item="{ visited, step, active }">
+    <template #header-item="{ visited, step, active, processing, visit }">
       <li
         class="step" 
         :class="{
           'step-primary': visited,
-          'step-accent font-bold text-black dark:text-white': active
-        }">
+          'step-secondary': visited && processing || step.processing,
+          'step-accent font-bold text-black dark:text-white': active && !step.processing,
+          'step-secondary font-bold text-black dark:text-white': active && step.processing,
+        }"
+        @click="visit()">
         {{ step.id }}
       </li>
     </template>
 
     <slot />
 
-    <template #navigation="{ next, previous }">
+    <template #navigation="{ next, previous, previousStep, nextStep }">
       <div class="flex">
-        <button class="btn btn-neutral" @click="previous">Previous</button>
+        <button v-if="previousStep" class="btn btn-neutral" @click="previous">Previous</button>
         <div class="w-full"></div>
-        <button class="btn btn-neutral" @click="next">Next</button>
+        <button class="btn" :class="{ 'btn-neutral': nextStep, 'btn-primary': !nextStep }" @click="next">
+          {{ nextStep ? 'Next' : 'Finish' }}
+        </button>
       </div>
     </template>
   </Stepper>

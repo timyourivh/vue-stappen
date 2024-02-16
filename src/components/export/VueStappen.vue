@@ -95,7 +95,7 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards): Promi
     return true
   }
   
-  // Call component events from here
+  // Call component events from here  
   step.props['onUpdate:processing'](true)
   const result = await guard()
   step.props['onUpdate:processing'](false)
@@ -140,14 +140,19 @@ const previous = () => {
 
 const headerProps = (stepComponent: RendererNode, index: number) => {
   const active = stepComponent === currentStepComponent.value
+  const currentIndex = stepComponents.value.indexOf(currentStepComponent.value)
+  const targetIndex = stepComponents.value.indexOf(stepComponent)
     
   return {
     visited: history.value.includes(stepComponent.props.id),
     step: stepComponent.props,
+    processing: processing.value,
     active,
     index,
     currentIndex: currentStepIndex.value,
     number: index + 1,
+    visit: () => moveToIndex(getIndexById(stepComponent.props.id)),
+    delta: targetIndex - currentIndex
   }
 }
 
@@ -181,7 +186,7 @@ onMounted(() => {
       <component :is="currentStepComponent.children.default"></component>
     </div>
     <div>
-      <slot name="navigation" v-bind="{ previous, next }">
+      <slot name="navigation" v-bind="{ previous, next, nextStep: stepComponents[currentStepIndex + 1] ?? false, previousStep: stepComponents[currentStepIndex - 1] ?? false }">
         <button @click="previous">Previous</button>
         <button @click="next">Next</button>
       </slot>
