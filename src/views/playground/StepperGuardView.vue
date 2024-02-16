@@ -8,6 +8,7 @@ const allow = ref(true)
 const async = ref(false)
 const time = ref(1)
 const processing = ref()
+const progress = ref()
 
 // Simple example like front end validation.
 const movementGuard = () => {
@@ -16,6 +17,7 @@ const movementGuard = () => {
 
 // More complex example like server-side validation.
 const asyncMovementGuard = async () => {
+  progress.value.start()
   await new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();
@@ -83,8 +85,7 @@ const asyncMovementGuard = async () => {
         </div>
         <div v-if="async">
           <span class="label-text">Processing</span> 
-          <TimedProgressBar v-if="processing" :duration="time * 1000" />
-          <progress v-else class="progress" value="0"></progress>
+          <TimedProgressBar ref="progress" :duration="time * 1000" />
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ const generateForms = (count: number): Record<string, typeof form> => {
   const result: Record<string, typeof form> = {};
 
   for (let j = 0; j < count; j++) {
-    result[`step${j+1}`] = { ...form };
+    result[`step${j+1}`] = { ...form }
   }
 
   return result;
@@ -32,7 +32,7 @@ const movementGuard = () => {
   return forms[currentStep.value].allow
 }
 
-const asyncMovementGuard = async () => {
+const asyncMovementGuard = async () => {  
   await new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();
@@ -95,9 +95,8 @@ const asyncMovementGuard = async () => {
             </label>
           </div>
           <div v-if="forms[`step${step}`].async">
-            <span class="label-text">Processing</span> 
-            <TimedProgressBar v-if="forms[`step${step}`].processing" :duration="forms[`step${step}`].time * 1000" />
-            <progress v-else class="progress" value="0"></progress>
+            <span class="label-text">Processing</span>
+            <TimedProgressBar :start="forms[`step${step}`].processing" :duration="forms[`step${step}`].time * 1000" />
           </div>
         </div>
         <div v-if="step + 1 <= steps" class="divider divider-horizontal"></div>
