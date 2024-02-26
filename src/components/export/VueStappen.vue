@@ -122,6 +122,11 @@ const moveToIndex = async (index: number) => {
     return
   }
 
+  // Void if not actually moving
+  if (currentStepIndex.value === index) {
+    return
+  }
+
   // The actual move
   currentStepIndex.value = index
 
