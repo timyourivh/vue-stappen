@@ -4,7 +4,7 @@ This template should help get you started developing with Vue 3 in Vite.
 
 ## TODO list:
 
-- [ ] Update this README to someting useful;
+- [ ] Update this README to someting useful
 - [ ] Export components for production
 - [ ] Update NPM
 

@@ -92,7 +92,7 @@ const clearHistory = () => {
         <b>Behaviour explained:</b>
         <ul class="list-disc">
           <li>When a step is removed you will maintain the current step by id unless the step you're currently on is removed.</li>
-          <li>When the current step is removed, you will be moved to the first previous found step. For (this) example, when on step 5 or 6, if these steps get removed you will be placed back to step 4. This is to prevent unwanted progress and because it feels more natural.</li>
+          <li>When the current step is removed, you will be moved to the first previous found step. For (this) example, when on step 5 <span class="text-base-300 ">(or 6)</span>, if these steps get removed you will be placed back to step 4. This is to prevent unwanted progress and because it feels more natural.</li>
           <li>If the step you're currently on is removed and there is no previous step, like step 1 for example. You will be placed to the first step in the stepper which would be step 2.</li>
         </ul>
       </div>
