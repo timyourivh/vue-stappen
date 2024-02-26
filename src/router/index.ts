@@ -38,6 +38,10 @@ const router = createRouter({
         {
           path: 'step-guard',
           component: () => import('../views/playground/StepGuardView.vue')
+        },
+        {
+          path: 'dynamic-steps',
+          component: () => import('../views/playground/DynamicStepsView.vue')
         }
       ]
     }

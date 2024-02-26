@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, useSlots, type RendererNode, onMounted, nextTick, watch } from 'vue';
-import VueStap from './VueStap.vue';
-import kebabCase from 'lodash.kebabcase';
+import { computed, ref, useSlots, type RendererNode, onMounted, nextTick, watch } from 'vue'
+import VueStap from './VueStap.vue'
+import kebabCase from 'lodash.kebabcase'
 
 export type Guard = () => boolean|Promise<boolean>
 
@@ -27,12 +27,12 @@ watch(modelValue, (value) => {
   }  
 })
 
-const getSteps = (list: RendererNode[], result: RendererNode[] = []) => {
+const getSteps = (list: RendererNode[], result: RendererNode[] = []) => {  
   list.forEach(element => {    
     if (element.type === VueStap) {      
       result.push(element)
       return 
-    } else if (element.children) {
+    } else if (Array.isArray(element.children)) {
       getSteps(element.children, result)
     }
   });
@@ -63,7 +63,36 @@ const getIndexById = (id: string) => {
   return -1
 }
 
-const currentStepComponent = computed(() => { 
+watch([stepComponents, currentStepIndex], ([newSteps, newIndex], [oldSteps, oldIndex]) => {
+  if (newSteps.length !== oldSteps.length && oldSteps[oldIndex] && newSteps.find(({ props: { id } }) => id === oldSteps[oldIndex].props.id)) {
+    // Maintain current step by id
+
+    currentStepIndex.value = getIndexById(oldSteps[oldIndex].props.id)
+  }
+
+  const oldStepIds = oldSteps.map(({ props: { id }}) => id)
+  const newStepIds = newSteps.map(({ props: { id }}) => id)
+  const removedStepIds = oldStepIds.filter(step => !newStepIds.includes(step))
+
+  if (oldSteps[oldIndex] && removedStepIds.includes(oldSteps[oldIndex].props.id)) {
+    // If the step got removed
+
+    const offsetIndex = newIndex - (removedStepIds.indexOf(oldSteps[oldIndex].props.id) + 1)
+
+    if (stepComponents.value[offsetIndex]) {
+      // If the index exists set to index
+      currentStepIndex.value = offsetIndex
+    } else {
+      // Else move to first step
+      currentStepIndex.value = 0
+    }
+
+    // Always add new step to history
+    history.value.push(modelValue.value = currentStepComponent.value.props.id)
+  }
+})
+
+const currentStepComponent = computed(() => {
   return stepComponents.value[currentStepIndex.value]
 })
 
@@ -188,7 +217,7 @@ onMounted(() => {
   </div>
   <div>
     <div :class="stepClass">
-      <component :is="currentStepComponent.children.default"></component>
+      <component :is="currentStepComponent.children.default" v-if="currentStepComponent?.children"></component>
     </div>
     <div>
       <slot name="navigation" v-bind="{ previous, next, nextStep: stepComponents[currentStepIndex + 1] ?? false, previousStep: stepComponents[currentStepIndex - 1] ?? false }">
