@@ -45,4 +45,12 @@ import { Step, Stepper } from '@/components/export';
       </Step>
     </Stepper>
   </div>
+
+  
+
+  <div class="card bg-base-200 shadow-xl p-6">
+    <small>
+      An unstyled example. The point of this package is to "extend" this component and style it yourself.
+    </small>
+  </div>
 </template>

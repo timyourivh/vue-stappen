@@ -46,13 +46,13 @@ const asyncMovementGuard = async () => {
 <template>
   <div class="card bg-base-200 shadow-xl p-6">
     <div>
-      Basic
+      Step guard
     </div>
 
     <div class="text-sm breadcrumbs">
       <ul>
         <li><RouterLink to="/playground">Playground</RouterLink></li> 
-        <li>Basic</li> 
+        <li>Step guard</li> 
       </ul>
     </div>
   </div>
@@ -72,6 +72,10 @@ const asyncMovementGuard = async () => {
   </div>
 
   <div class="card bg-base-200 shadow-xl p-6">
+    <small>
+      A a different guard for each step.
+    </small>
+    <div class="divider" />
     <div class="flex justify-center">
       <template v-for="step in steps" :key="step">
         <div class="w-full">

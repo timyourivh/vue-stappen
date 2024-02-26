@@ -57,7 +57,12 @@ const clearHistory = () => {
     </component>
   </div>
 
+
   <div class="card bg-base-200 shadow-xl p-6">
+    <small>
+      A basic stepper that has been styled, this is component will be used throughout all examples.
+    </small>
+    <div class="divider" />
     <div class="flex justify-center">
       <div class="w-1/3">
         <div class="form-control">
@@ -79,7 +84,7 @@ const clearHistory = () => {
         </div>
         <div>
           <span class="label-text">History</span> 
-          <ul class="max-h-36 overflow-auto list-disc pl-3">
+          <ul class="max-h-16 overflow-auto list-disc pl-3">
             <li v-for="(item, index) in Array(...history).reverse()" :key="index" class="text-sm">{{ item }}</li>
           </ul>
         </div>

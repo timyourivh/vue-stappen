@@ -31,13 +31,13 @@ const asyncMovementGuard = async () => {
 <template>
   <div class="card bg-base-200 shadow-xl p-6">
     <div>
-      Basic
+      Stepper guard
     </div>
 
     <div class="text-sm breadcrumbs">
       <ul>
         <li><RouterLink to="/playground">Playground</RouterLink></li> 
-        <li>Basic</li> 
+        <li>Stepper guard</li> 
       </ul>
     </div>
   </div>
@@ -63,6 +63,10 @@ const asyncMovementGuard = async () => {
   </div>
 
   <div class="card bg-base-200 shadow-xl p-6">
+    <small>
+      A single "global" guard for the whole stepper.
+    </small>
+    <div class="divider" />
     <div class="flex justify-center">
       <div class="w-1/3">
         <div class="form-control">
