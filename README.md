@@ -12,7 +12,7 @@ Vue 3 skeleton components to easily help you build the best stepper/wizzard you'
     - [ ] It's very good
     - [ ] It's the best documentation I've ever red
 - [x] Prepare components for production
-- [ ] Update NPM
+- [x] Update NPM
 
 ## Installation
 
@@ -101,7 +101,8 @@ import { Step } from 'vue-stappen'
 ``` 
 
 ## Documentation
-(Create wiki and add wiki links here)
+
+### Coming soon!
 
 ## Contributing
 
