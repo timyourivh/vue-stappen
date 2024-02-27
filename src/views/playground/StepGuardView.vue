@@ -2,6 +2,7 @@
 import DefaultStepper from '@/components/DefaultStepper.vue';
 import TimedProgressBar from '@/components/TimedProgressBar.vue';
 import { Step } from '@/components/export';
+import type { GuardProps } from '@/components/export/VueStappen.vue';
 import { reactive, ref } from 'vue';
 
 const currentStep = ref()
@@ -28,11 +29,15 @@ const generateForms = (count: number): Record<string, typeof form> => {
 
 const forms = reactive(generateForms(steps))
 
-const movementGuard = () => {
+const movementGuard = (...props: GuardProps[]) => {
+  console.log(...props)
+  
   return forms[currentStep.value].allow
 }
 
-const asyncMovementGuard = async () => {  
+const asyncMovementGuard = async (...props: GuardProps[]) => {
+  console.log(...props) 
+
   await new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve();

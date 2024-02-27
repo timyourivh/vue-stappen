@@ -3,7 +3,12 @@ import { computed, ref, useSlots, type RendererNode, onMounted, nextTick, watch 
 import VueStap from './VueStap.vue'
 import kebabCase from 'lodash.kebabcase'
 
-export type Guard = () => boolean|Promise<boolean>
+export type GuardProps<T = {[key: string]: any}> = {
+  direction: number|null,
+  currentStep: T, 
+  targetStep?: T
+}
+export type Guard = (props: GuardProps) => boolean|Promise<boolean>
 
 interface Guards {
   onMove?: Guard
@@ -103,7 +108,15 @@ const getGuard = (object: Record<string, any>, key: string): Guard|undefined => 
   return object[kebabCase(key)]
 }
 
-const checkStepperGuard = async (guardKey: keyof Guards): Promise<boolean> => {
+const calculateDirection = (source: RendererNode, target?: RendererNode) => {
+  if (!target) {
+    return null
+  }
+
+  return stepComponents.value.indexOf(target) - stepComponents.value.indexOf(source)
+}
+
+const checkStepperGuard = async (guardKey: keyof Guards, direction: number|null, targetStep?: RendererNode): Promise<boolean> => {
   const guard = getGuard(props, guardKey)
 
   if (guard === undefined) {
@@ -111,13 +124,17 @@ const checkStepperGuard = async (guardKey: keyof Guards): Promise<boolean> => {
   }
 
   processing.value = true
-  const result = await guard()
+  const result = await guard({
+    direction,
+    currentStep: currentStepComponent.value.props, 
+    targetStep: targetStep?.props ?? null
+  })
   processing.value = false
 
   return result
 }
 
-const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards): Promise<boolean> => {  
+const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direction: number|null, targetStep?: RendererNode): Promise<boolean> => {  
   const guard = getGuard(step.props, guardKey)  
 
   if (guard === undefined) {
@@ -126,7 +143,11 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards): Promi
   
   // Call component events from here  
   step.props['onUpdate:processing'](true)
-  const result = await guard()
+  const result = await guard({
+    direction,
+    currentStep: currentStepComponent.value.props, 
+    targetStep: targetStep?.props ?? null
+  })
   step.props['onUpdate:processing'](false)
 
   return result
@@ -138,16 +159,19 @@ const moveToIndex = async (index: number) => {
     return
   }
 
-  if (!await checkStepperGuard('onMove')) {
+  const targetStep = stepComponents.value[index]
+  const direction = calculateDirection(currentStepComponent.value, targetStep)
+
+  if (!await checkStepperGuard('onMove', direction, targetStep)) {
     return
   }
 
-  if (!await checkStepGuard(currentStepComponent.value, 'onMove')) {
+  if (!await checkStepGuard(currentStepComponent.value, 'onMove', direction, targetStep)) {
     return
   }
   
   // Void if next step doesn't exist
-  if (!stepComponents.value[index]) {
+  if (!targetStep) {
     return
   }
 

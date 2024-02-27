@@ -2,6 +2,7 @@
 import DefaultStepper from '@/components/DefaultStepper.vue';
 import TimedProgressBar from '@/components/TimedProgressBar.vue';
 import { Step } from '@/components/export';
+import type { GuardProps } from '@/components/export/VueStappen.vue';
 import { ref } from 'vue';
 
 const allow = ref(true)
@@ -11,12 +12,16 @@ const processing = ref()
 const progress = ref()
 
 // Simple example like front end validation.
-const movementGuard = () => {
+const movementGuard = (...props: GuardProps[]) => {
+  console.log(...props)
+
   return allow.value
 }
 
 // More complex example like server-side validation.
-const asyncMovementGuard = async () => {
+const asyncMovementGuard = async (...props: GuardProps[]) => {
+  console.log(...props)
+
   progress.value.start()
   await new Promise<void>((resolve) => {
     setTimeout(() => {
