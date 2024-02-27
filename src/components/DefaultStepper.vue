@@ -14,7 +14,7 @@ import { Stepper } from './export'
           'step-secondary font-bold text-black dark:text-white': active && step.processing,
         }"
         @click="visit()">
-        {{ step.id }}
+        {{ step.title ?? step.id }}
       </li>
     </template>
 

@@ -153,7 +153,14 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direct
   return result
 }
 
+const formRef = ref()
 const moveToIndex = async (index: number) => {
+  // Check browser validation
+  if (!formRef.value.checkValidity()) {
+    formRef.value.reportValidity()
+    return
+  }
+
   // Void if stepper or step is still processing  
   if (currentStepComponent.value.props.processing || processing.value) {
     return
@@ -240,9 +247,9 @@ onMounted(() => {
     </template>
   </div>
   <div>
-    <div :class="stepClass">
+    <form ref="formRef" :class="stepClass" @submit.prevent="next">
       <component :is="currentStepComponent.children.default" v-if="currentStepComponent?.children"></component>
-    </div>
+    </form>
     <div>
       <slot name="navigation" v-bind="{ previous, next, nextStep: stepComponents[currentStepIndex + 1] ?? false, previousStep: stepComponents[currentStepIndex - 1] ?? false }">
         <button @click="previous">Previous</button>

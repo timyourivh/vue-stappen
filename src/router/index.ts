@@ -42,6 +42,10 @@ const router = createRouter({
         {
           path: 'dynamic-steps',
           component: () => import('../views/playground/DynamicStepsView.vue')
+        },
+        {
+          path: 'form-submit',
+          component: () => import('../views/playground/FormSubmitView.vue')
         }
       ]
     }
