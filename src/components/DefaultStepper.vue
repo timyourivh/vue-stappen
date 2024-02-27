@@ -20,11 +20,11 @@ import { Stepper } from './export'
 
     <slot />
 
-    <template #navigation="{ next, previous, previousStep, nextStep }">
+    <template #navigation="{ next, previous, previousStep, nextStep, processing }">
       <div class="flex">
-        <button v-if="previousStep" class="btn btn-neutral" @click="previous">Previous</button>
+        <button v-if="previousStep" class="btn btn-neutral" :disabled="processing" @click="previous" >Previous</button>
         <div class="w-full"></div>
-        <button class="btn" :class="{ 'btn-neutral': nextStep, 'btn-primary': !nextStep }" @click="next">
+        <button class="btn" :class="{ 'btn-neutral': nextStep, 'btn-primary': !nextStep }" :disabled="processing" @click="next">
           {{ nextStep ? 'Next' : 'Finish' }}
         </button>
       </div>

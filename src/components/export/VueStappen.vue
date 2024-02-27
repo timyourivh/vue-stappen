@@ -24,6 +24,7 @@ const props = defineProps<{
 const history = defineModel<string[]>('history', { default: [] })
 const modelValue = defineModel<string>({ default: null })
 const processing = defineModel<boolean>('processing', { default: false })
+const stepProcessing = defineModel<boolean>('stepProcessing', { default: false })
 
 watch(modelValue, (value) => {
   const targetIndex = getIndexById(value)
@@ -143,12 +144,14 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direct
   
   // Call component events from here  
   step.props['onUpdate:processing'](true)
+  stepProcessing.value = true
   const result = await guard({
     direction,
     currentStep: currentStepComponent.value.props, 
     targetStep: targetStep?.props ?? null
   })
   step.props['onUpdate:processing'](false)
+  stepProcessing.value = false
 
   return result
 }
@@ -221,6 +224,15 @@ const headerProps = (stepComponent: RendererNode, index: number) => {
   }
 }
 
+const navigationProps = () => {
+  return {
+    previous,
+    next,
+    nextStep: stepComponents.value[currentStepIndex.value + 1] ?? false,
+    previousStep: stepComponents.value[currentStepIndex.value - 1] ?? false, 
+    processing: processing.value || stepProcessing.value
+  }
+}
 onMounted(() => {
   processing.value = false
   if (modelValue.value !== null) {
@@ -251,7 +263,7 @@ onMounted(() => {
       <component :is="currentStepComponent.children.default" v-if="currentStepComponent?.children"></component>
     </form>
     <div>
-      <slot name="navigation" v-bind="{ previous, next, nextStep: stepComponents[currentStepIndex + 1] ?? false, previousStep: stepComponents[currentStepIndex - 1] ?? false }">
+      <slot name="navigation" v-bind="navigationProps()">
         <button @click="previous">Previous</button>
         <button @click="next">Next</button>
       </slot>
