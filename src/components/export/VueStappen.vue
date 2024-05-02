@@ -26,6 +26,10 @@ const modelValue = defineModel<string>({ default: null })
 const processing = defineModel<boolean>('processing', { default: false })
 const stepProcessing = defineModel<boolean>('stepProcessing', { default: false })
 
+/**
+ * This watcher is responsible for moving the stepper when the 
+ * model value is updated.
+ */
 watch(modelValue, (value) => {
   const targetIndex = getIndexById(value)
   if (targetIndex !== currentStepIndex.value) {
@@ -69,6 +73,10 @@ const getIndexById = (id: string) => {
   return -1
 }
 
+/**
+ * This Watcher is responsible for preveting the current step to "go out of bounds".
+ * It watches for any changes in visible steps and updated the current position accordingly.
+ */
 watch([stepComponents, currentStepIndex], ([newSteps, newIndex], [oldSteps, oldIndex]) => {
   if (newSteps.length !== oldSteps.length && oldSteps[oldIndex] && newSteps.find(({ props: { id } }) => id === oldSteps[oldIndex].props.id)) {
     // Maintain current step by id
@@ -142,15 +150,20 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direct
     return true
   }
   
+  // Update processing v-model if used
+  if (step.props['onUpdate:processing']) step.props['onUpdate:processing'](true)
+
   // Call component events from here  
-  step.props['onUpdate:processing'](true)
   stepProcessing.value = true
   const result = await guard({
     direction,
     currentStep: currentStepComponent.value.props, 
     targetStep: targetStep?.props ?? null
   })
-  step.props['onUpdate:processing'](false)
+
+  // Update processing v-model if used
+  if (step.props['onUpdate:processing']) step.props['onUpdate:processing'](false)
+  
   stepProcessing.value = false
 
   return result
@@ -172,10 +185,12 @@ const moveToIndex = async (index: number) => {
   const targetStep = stepComponents.value[index]
   const direction = calculateDirection(currentStepComponent.value, targetStep)
 
+  // Check global guard, void if result if negative
   if (!await checkStepperGuard('onMove', direction, targetStep)) {
     return
   }
 
+  // Check guard defined on step itself, void if negative
   if (!await checkStepGuard(currentStepComponent.value, 'onMove', direction, targetStep)) {
     return
   }
@@ -195,8 +210,6 @@ const moveToIndex = async (index: number) => {
 
   // Add current step to hitory
   history.value.push(modelValue.value = currentStepComponent.value.props.id)
-
-  return
 }
 
 const next = () => {
