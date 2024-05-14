@@ -30,7 +30,7 @@ import { Step, Stepper } from '@/components/export';
 
       <Step id="step2">
         <template #header="{ active, number }">
-          <span v-if="active" v-text="'(active)'"/> Overwrite default header for {{ number }}
+          [ <span v-if="active" v-text="'(active)'"/> Overwrite default header for {{ number }} ]
         </template>
 
         <template #default>
