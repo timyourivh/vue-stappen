@@ -17,7 +17,8 @@ interface Guards {
 // Definitions
 const props = defineProps<{
   headerClass?: string
-  stepClass?: string
+  stepClass?: string,
+  headerAnimation?: string | object
 } & Guards>()
 
 // Models
@@ -208,7 +209,7 @@ const moveToIndex = async (index: number) => {
   // The actual move
   currentStepIndex.value = index
 
-  // Add current step to hitory
+  // Add current step to history and mark it as visited.
   history.value.push(modelValue.value = currentStepComponent.value.props.id)
 }
 
@@ -225,15 +226,15 @@ const headerProps = (stepComponent: RendererNode, index: number) => {
   const targetIndex = stepComponents.value.indexOf(stepComponent)
     
   return {
-    visited: history.value.includes(stepComponent.props.id),
-    step: stepComponent.props,
-    processing: processing.value,
-    active,
     index,
-    currentIndex: currentStepIndex.value,
     number: index + 1,
+    active,
+    visited: history.value.includes(stepComponent.props.id),
+    processing: processing.value,
+    step: stepComponent.props,
+    currentIndex: currentStepIndex.value,
+    delta: targetIndex - currentIndex,
     visit: () => moveToIndex(getIndexById(stepComponent.props.id)),
-    delta: targetIndex - currentIndex
   }
 }
 
@@ -241,8 +242,9 @@ const navigationProps = () => {
   return {
     previous,
     next,
-    nextStep: stepComponents.value[currentStepIndex.value + 1] ?? false,
-    previousStep: stepComponents.value[currentStepIndex.value - 1] ?? false, 
+    currentStep: currentStepComponent.value?.props,
+    nextStep: stepComponents.value[currentStepIndex.value + 1]?.props ?? false,
+    previousStep: stepComponents.value[currentStepIndex.value - 1]?.props ?? false, 
     processing: processing.value || stepProcessing.value
   }
 }
@@ -273,6 +275,7 @@ onMounted(() => {
   </div>
   <div>
     <form ref="formRef" :class="stepClass" @submit.prevent="next">
+      <input type="submit" hidden />
       <component :is="currentStepComponent.children.default" v-if="currentStepComponent?.children"></component>
     </form>
     <div>
