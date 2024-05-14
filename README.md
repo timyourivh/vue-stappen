@@ -6,13 +6,16 @@ Vue 3 skeleton components to easily help you build the best stepper/wizzard you'
 
 - [x] Update this README to someting useful, like documentation
     - [ ] It's bad
-    - [x] It's not **that** bad
-    - [ ] It's ok
+    - [ ] It's not **that** bad
+    - [ ] It could be better
+    - [x] It's ok
     - [ ] It's good
     - [ ] It's very good
     - [ ] It's the best documentation I've ever red
 - [x] Prepare components for production
 - [x] Update NPM
+- [ ] Add tests
+- [ ] Better typing (help needed)
 
 ## Installation
 
@@ -100,9 +103,170 @@ import { Step } from 'vue-stappen'
 </template>
 ``` 
 
-## Documentation
+## Documentation / Setup guide
 
-### Coming soon!
+### Creating your own component
+
+This library is designed to empower developers to create custom steppers with ease, providing a solid foundation for building intuitive and interactive user interfaces. In this guide, you will find comprehensive information on how to leverage our framework to craft your own unique stepper experiences. Let's dive in and start building!
+
+Let's get started by creating a basic component and import the Stepper:
+
+```vue
+<!-- src/components/defaultStepper.vue -->
+
+<script setup>
+import { Stepper } from 'vue-stappen'
+</script>
+
+<template>
+  <Stepper>
+    <slot />
+  </Stepper>
+<template>
+```
+
+To style the header we can use a template for each item:
+
+```vue
+<template>
+  <Stepper>
+    <template #header-item="{ step }">
+      <li @click="visit()">
+        {{ step.id }}
+      </li>
+    </template>
+
+    <slot />
+  </Stepper>
+<template>
+```
+
+I made sure to provide the header item with as much useful properties as possible aswell as the callbacks to allow for total controll. Keep in mind this template lives inside a loop which loops for each step the stepper can see.
+
+As of now I made these props available:
+
+| Prop | Type | What it does |
+| - | - | - |
+| index | Number | The index of the step |
+| number | Number | Basically index of the step + 1. Usefull to automatically number the steps and makes it eastier to understand when reading the code. |
+| active | Boolean | A flag usefull to determine if on the current flag |
+| visited | Boolean | A flag for when a step has been visited (or it's id is present in the history) it will return `true` else `false` |
+| processing | Boolean | A flag that will  |
+| step | Object | This is an object that contains all propeties you set on the step. For example if you need a title available, you can set it on the Step component and it will be available in this property. This assures the best reactivity in vue and the best flexibility when creating a stepper. |
+| currentIndex | Number | The index of of the step that is currently active |
+| delta | Number | The distance from the current step |
+
+The current callbacks are as follows:
+
+| Callback | The params it takes | What it does |
+| - | - | - |
+| visit() | - | Initiates an attempt to move to the current step |
+
+These props and callbacks can be used to conditionally style your stepper. For example, if we want to highlight the current active step, we can do this:
+
+```vue
+<template #header-item="{ step, active, visited }">
+  <li :class="{
+    'text-red-500': active
+  }" @click="visit()">
+    {{ step.id }}
+  </li>
+</template>
+```
+
+If we want to highlight the visted steps:
+
+```vue
+<template #header-item="{ step, active, visited }">
+  <li :class="{
+    'text-red-500': active,
+    'text-blue-500': visited,
+  }" @click="visit()">
+    {{ step.id }}
+  </li>
+</template>
+```
+
+If we want to take a "progressive" approach we can do this too. With "progressive" I mean highlighting all preceding steps and never subsequent steps even if they're visited to create a progressbar-like effect. Example:
+
+```vue
+<template #header-item="{ step, active, delta }">
+  <li :class="{
+    'text-red-500': active,
+    'text-blue-500': delta <= 0, // Marks all preceding with blue
+  }" @click="Math.abs(delta) === 1 ? visit() : null">
+    {{ step.id }}
+  </li>
+</template>
+```
+
+### Using the stepper
+
+Using the stepper is as easy as just importing the component and adding steps to it. The only mandatory prop for a step is it's `id`. The stepper will automatically detect these steps:
+
+```vue
+<script setup>
+import Stepper from '@/components/progressiveStepper';
+import { Step } from 'vue-stappen';
+</script>
+
+<template>
+  <Stepper>
+    <Step id="step1" custom-prop="You can use this value in the header by accesssing `step['custom-prop']`">
+      Boddy of the step.
+    </Step>
+    <!-- Add as many as you want, as long as they have unique id's -->
+  </Stepper>
+</template>
+```
+
+### Guards
+
+I've added a guard system that allows you to prevent access to a step. You can add a global guard to the stepper component or add a single guard to a specific step. When both defined the global guard will be processed first, then the step guard defined on the step. Here is an example:
+
+```vue
+<script setup>
+// Async exmaple
+const globalGuard = async () => {
+  return await new Promise((resolve, reject) => {
+    resolve(true) // Allow move
+    resolve(false) // Deny move
+    reject('error') // Throw error
+  })
+}
+
+// Basic conditional example
+const stepGuard = () => {
+  return true // Allow move
+  return false // Deny move
+}
+</script>
+
+<template>
+  <Stepper :on-move="globalGuard">
+    <Step :on-move="stepGuard">
+      <!-- ... -->
+    </Step>
+  </Stepper>
+</template>
+```
+
+I plan to add shorthands in the future to allow easier definitions like:
+
+- on-forward
+- on-reverse
+- on-next
+- on-previous
+
+__Note:__ These are not added yet.
+
+The guards receive the following parameters:
+
+| Name | Type | Description |
+|-|-|-| 
+| direction | Number | This parameter indicates what direction the user wants to go to. For example if the user clicks "next" it will be `1`, if the user click "previous" it will be `-1`, If the user clicks a header item 2 steps away from the current step it will be `2` |
+| currentStep | Object | An object containing the props set on the step the users is currently on. |
+| targetStep | Object\|null | This will either be an object containing props of the target step or null depending on if the step exists.
 
 ## Contributing
 
