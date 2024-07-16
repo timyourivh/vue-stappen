@@ -5,13 +5,14 @@ Vue 3 skeleton components to easily help you build the best stepper/wizzard you'
 ## TODO list
 
 - [x] Update this README to someting useful, like documentation
-    - [ ] It's bad
-    - [ ] It's not **that** bad
-    - [ ] It could be better
-    - [x] It's ok
-    - [ ] It's good
-    - [ ] It's very good
-    - [ ] It's the best documentation I've ever red
+    - https://strawpoll.com/XOgOVJpRrn3
+      - [ ] It's bad
+      - [ ] It's not **that** bad
+      - [ ] It could be better
+      - [x] It's ok
+      - [ ] It's good
+      - [ ] It's very good
+      - [ ] It's the best documentation I've ever seen
 - [x] Prepare components for production
 - [x] Update NPM
 - [ ] Add tests
@@ -238,8 +239,12 @@ const globalGuard = async () => {
 
 // Basic conditional example
 const stepGuard = () => {
-  return true // Allow move
-  return false // Deny move
+  // Explicitily returnt `true` to allow move
+  return true
+
+  // Any thing else to deny the move
+  return
+  return false
 }
 </script>
 
@@ -252,24 +257,25 @@ const stepGuard = () => {
 </template>
 ```
 
-I plan to add shorthands in the future to allow easier definitions like:
+There are 3 guards that are executed in the listed order:
 
-- on-forward
-- on-reverse
-- on-next
-- on-previous
+| Name | Description |
+| - | - |
+| onMove \| on-move | Guards any movement |
+| onForward \| on-forward | Guards forward movement |
+| onReverse \| on-reverse | Guards reverse movement |
 
-__Note:__ These are not added yet.
-
-The guards receive the following parameters:
+These guards all receive the following parameters:
 
 | Name | Type | Description |
-|-|-|-| 
+| - | - | - | 
 | direction | Number | This parameter indicates what direction the user wants to go to. For example if the user clicks "next" it will be `1`, if the user click "previous" it will be `-1`, If the user clicks a header item 2 steps away from the current step it will be `2` |
 | currentStep | Object | An object containing the props set on the step the users is currently on. |
 | targetStep | Object\|null | This will either be an object containing props of the target step or null depending on if the step exists.
 
 ## Contributing
+
+I appreciate any contributions. I'm still learning how to properly package things and I'm struggling with defining the types accurately. If you have suggestions for improvement or ideas on how things could be done better, please share them with me. Thank you!
 
 <details>
   <summary>Click to expand</summary>
