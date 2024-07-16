@@ -238,6 +238,7 @@ const headerProps = (stepComponent: RendererNode, index: number) => {
     step: stepComponent.props,
     currentIndex: currentStepIndex.value,
     delta: targetIndex - currentIndex,
+    total: stepComponents.value.length,
     visit: () => moveToIndex(getIndexById(stepComponent.props.id)),
   }
 }
