@@ -150,11 +150,12 @@ As of now I made these props available:
 | index | Number | The index of the step |
 | number | Number | Basically index of the step + 1. Usefull to automatically number the steps and makes it eastier to understand when reading the code. |
 | active | Boolean | A flag usefull to determine if on the current flag |
-| visited | Boolean | A flag for when a step has been visited (or it's id is present in the history) it will return `true` else `false` |
-| processing | Boolean | A flag that will  |
+| visited | Boolean | A flag for when a step has been visited (or it's id is present in the history) |
+| processing | Boolean | A flag to determine if the stepper is processing. For individual steps use `step.processing` |
 | step | Object | This is an object that contains all propeties you set on the step. For example if you need a title available, you can set it on the Step component and it will be available in this property. This assures the best reactivity in vue and the best flexibility when creating a stepper. |
 | currentIndex | Number | The index of of the step that is currently active |
 | delta | Number | The distance from the current step |
+| total | Number | The total number of steps |
 
 The current callbacks are as follows:
 
