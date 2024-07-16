@@ -12,6 +12,8 @@ export type Guard = (props: GuardProps) => boolean|Promise<boolean>
 
 interface Guards {
   onMove?: Guard
+  onForward?: Guard
+  onReverse?: Guard
 }
 
 // Definitions
@@ -120,6 +122,8 @@ const getGuard = (object: Record<string, any>, key: string): Guard|undefined => 
 
 const calculateDirection = (source: RendererNode, target?: RendererNode) => {
   if (!target) {
+    console.log('returned null');
+    
     return null
   }
 
@@ -144,8 +148,9 @@ const checkStepperGuard = async (guardKey: keyof Guards, direction: number|null,
   return result
 }
 
-const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direction: number|null, targetStep?: RendererNode): Promise<boolean> => {  
-  const guard = getGuard(step.props, guardKey)  
+const checkStepGuard = async (guardKey: keyof Guards, direction: number|null, targetStep?: RendererNode): Promise<boolean> => {
+  const step = currentStepComponent.value
+  const guard = getGuard(step.props, guardKey)
 
   if (guard === undefined) {
     return true
@@ -154,20 +159,20 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direct
   // Update processing v-model if used
   if (step.props['onUpdate:processing']) step.props['onUpdate:processing'](true)
   // Else just update props
-  else currentStepComponent.value.props.processing = true
+  else step.props.processing = true
 
   // Call component events from here  
   stepProcessing.value = true
   const result = await guard({
     direction,
-    currentStep: currentStepComponent.value.props, 
+    currentStep: step.props, 
     targetStep: targetStep?.props ?? null
   })
 
   // Update processing v-model if used
   if (step.props['onUpdate:processing']) step.props['onUpdate:processing'](false)
   // Else just update props
-  else currentStepComponent.value.props.processing = false
+  else step.props.processing = false
   
   stepProcessing.value = false
 
@@ -190,15 +195,15 @@ const moveToIndex = async (index: number) => {
   const targetStep = stepComponents.value[index]
   const direction = calculateDirection(currentStepComponent.value, targetStep)
 
-  // Check global guard, void if result if negative
-  if (!await checkStepperGuard('onMove', direction, targetStep)) {
-    return
-  }
+  // Check global guards, void if result if negative
+  if (!await checkStepperGuard('onMove', direction, targetStep)) return
+  if (direction !== null && direction >= 1 && !await checkStepperGuard('onForward', direction, targetStep)) return
+  else if (direction !== null && direction <= 1 && !await checkStepperGuard('onReverse', direction, targetStep)) return
 
-  // Check guard defined on step itself, void if negative
-  if (!await checkStepGuard(currentStepComponent.value, 'onMove', direction, targetStep)) {
-    return
-  }
+  // Check guards defined on step itself, void if negative
+  if (!await checkStepGuard('onMove', direction, targetStep)) return
+  if (direction !== null && direction >= 1 && !await checkStepGuard('onForward', direction, targetStep)) return
+  else if (direction !== null && direction <= 1 && !await checkStepGuard('onReverse', direction, targetStep)) return
   
   // Void if next step doesn't exist
   if (!targetStep) {
