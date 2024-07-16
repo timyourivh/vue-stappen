@@ -275,14 +275,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="headerClass">
+  <ul :class="headerClass">
     <template v-for="(stepComponent, index) in stepComponents" :key="stepComponent.props.id">
       <component :is="stepComponent.children.header" v-bind="headerProps(stepComponent, index)" v-if="stepComponent.children?.header" />
       <slot v-else v-bind="headerProps(stepComponent, index)" name="header-item">
         Step {{ index + 1 }}
       </slot>
     </template>
-  </div>
+  </ul>
   <div>
     <form ref="formRef" :class="stepClass" @submit.prevent="next">
       <input type="submit" hidden />
