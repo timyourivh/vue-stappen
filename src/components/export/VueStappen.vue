@@ -153,6 +153,8 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direct
   
   // Update processing v-model if used
   if (step.props['onUpdate:processing']) step.props['onUpdate:processing'](true)
+  // Else just update props
+  else currentStepComponent.value.props.processing = true
 
   // Call component events from here  
   stepProcessing.value = true
@@ -164,6 +166,8 @@ const checkStepGuard = async (step: RendererNode, guardKey: keyof Guards, direct
 
   // Update processing v-model if used
   if (step.props['onUpdate:processing']) step.props['onUpdate:processing'](false)
+  // Else just update props
+  else currentStepComponent.value.props.processing = false
   
   stepProcessing.value = false
 
