@@ -27,8 +27,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.d.tx",
-      "require": "./dist/index.d.tx"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     }
   },
   "files": [

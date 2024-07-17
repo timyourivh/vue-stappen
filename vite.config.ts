@@ -15,7 +15,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/components/export/index.ts"),
       name: "VueStappen",
-      fileName: "vue-stappen",
+      fileName: "index",
     },
     rollupOptions: {
       external: ["vue"],
