@@ -122,8 +122,6 @@ const getGuard = (object: Record<string, any>, key: string): Guard|undefined => 
 
 const calculateDirection = (source: RendererNode, target?: RendererNode) => {
   if (!target) {
-    console.log('returned null');
-    
     return null
   }
 
