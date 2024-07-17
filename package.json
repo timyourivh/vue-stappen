@@ -27,8 +27,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/vue-stappen.js",
-      "require": "./dist/vue-stappen.js"
+      "import": "./dist/index.d.tx",
+      "require": "./dist/index.d.tx"
     }
   },
   "files": [
